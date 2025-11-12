@@ -205,4 +205,5 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
-# --- Model & Data Artifacts (CRITICAL FOR VIDHIK AI) ---\n*.faiss\n*.idx\n*.index\n*.bin\n*.pkl\n*.pickle\n*.joblib
+# --- Model & Data Artifacts (CRITICAL FOR VIDHIK AI) ---
+\n*.faiss\n*.idx\n*.index\n*.bin\n*.pkl\n*.pickle\n*.joblib
