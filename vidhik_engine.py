@@ -3,8 +3,8 @@ import faiss
 import pickle
 import os
 
-FAISS_INDEX_PATH = "vidhik_legal_db.faiss"
-FAISS_METADATA_PATH = "vidhik_legal_db_metadata.pkl"
+FAISS_INDEX_PATH = "data/vidhik_legal_db.faiss"
+FAISS_METADATA_PATH = "data/vidhik_legal_db_metadata.pkl"
 
 # Global variables to store the loaded index and metadata
 loaded_index = None
