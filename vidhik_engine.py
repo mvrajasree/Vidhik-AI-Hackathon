@@ -1,4 +1,4 @@
-# --- vidhik_engine.py (Complete Implementation) ---
+# --- vidhik_engine.py (Complete Implementation with Overall Status) ---
 import faiss
 import pickle
 import os
@@ -126,6 +126,32 @@ def detect_pii(text):
         "status": "PII Found" if detected_pii else "Clean"
     }
 
+def calculate_overall_status(conflicting_laws, bias_phrases, pii_results):
+    """
+    Calculate overall status based on analysis results.
+    
+    Args:
+        conflicting_laws (list): List of conflicting legal provisions
+        bias_phrases (list): List of flagged biased phrases
+        pii_results (dict): PII detection results
+        
+    Returns:
+        str: Overall status ('High Risk', 'Medium Risk', 'Low Risk', 'Clean')
+    """
+    # Count risk factors
+    high_risk_conflicts = len([law for law in conflicting_laws if law.get("Risk Level") == "HIGH"])
+    has_pii = pii_results.get("pii_found", False)
+    has_bias = len(bias_phrases) > 0
+    has_any_conflicts = len(conflicting_laws) > 0
+    
+    # Determine overall status
+    if high_risk_conflicts > 0 or has_pii:
+        return "High Risk"
+    elif has_any_conflicts or has_bias:
+        return "Medium Risk"
+    else:
+        return "Clean"
+
 def analyze_policy(new_policy_text, similarity_threshold=0.3):
     """
     Core function for policy analysis. This function:
@@ -147,6 +173,7 @@ def analyze_policy(new_policy_text, similarity_threshold=0.3):
     if index is None or metadata is None:
         # Return a failure report if the database is missing
         return {
+            "Overall Status": "Database Error",
             "Actionable Recommendations": "### Recommendations for Legal Conflicts\n- **Database Error:** The legal database failed to load. Please ensure `vidhik_legal_db.faiss` and `vidhik_legal_db_metadata.pkl` are correctly pushed to the `data/` directory using Git LFS.",
             "Raw Reports": {
                 "Conflict Report": {"Status": "Failed", "Conflicting Laws": []},
@@ -161,6 +188,7 @@ def analyze_policy(new_policy_text, similarity_threshold=0.3):
         new_embedding = np.array(new_embedding).astype('float32')
     except Exception as e:
         return {
+            "Overall Status": "Processing Error",
             "Actionable Recommendations": f"### Embedding Error\n- Failed to encode policy text: {str(e)}",
             "Raw Reports": {
                 "Conflict Report": {"Status": "Failed", "Conflicting Laws": []},
@@ -205,11 +233,15 @@ def analyze_policy(new_policy_text, similarity_threshold=0.3):
         pii_results = {"pii_found": False, "detected_items": [], "status": "Error"}
         print(f"Error during PII detection: {e}")
     
-    # 5. Generate actionable recommendations
+    # 5. Calculate overall status
+    overall_status = calculate_overall_status(conflicting_laws, bias_results, pii_results)
+    
+    # 6. Generate actionable recommendations
     recommendations = generate_recommendations(conflicting_laws, bias_results, pii_results)
     
-    # 6. Compile final report
+    # 7. Compile final report
     report = {
+        "Overall Status": overall_status,
         "Actionable Recommendations": recommendations,
         "Raw Reports": {
             "Conflict Report": {
@@ -302,5 +334,6 @@ if __name__ == "__main__":
     print("\n" + "="*50)
     print("ANALYSIS RESULTS:")
     print("="*50)
+    print(f"Overall Status: {result['Overall Status']}")
     print(result["Actionable Recommendations"])
     print("\nRaw Reports available in result['Raw Reports']")
