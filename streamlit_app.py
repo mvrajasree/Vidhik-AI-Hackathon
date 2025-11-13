@@ -1,290 +1,191 @@
-"""
-Vidhik AI – Government Blue Dashboard
-Complete Streamlit UI + PDF Export
-"""
-
 import streamlit as st
 import json
-import io
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-from datetime import datetime
+import tempfile
+import os
 
-# Try import of actual engine
-try:
-    from vidhik_engine import analyze_policy
-except Exception:
-    def analyze_policy(text):
-        now = datetime.utcnow().isoformat() + "Z"
-        return {
-            "Overall Status": "Medium Risk",
-            "Executive Summary": "Demo version: medium risk found (PII + accessibility).",
-            "Actionable Recommendations": (
-                "### ⚖️ Legal Conflicts\n- Remove compulsory Aadhar.\n- Add retention limits.\n\n"
-                "### 🌍 Inclusive Language\n- Avoid hardware-exclusive requirements.\n\n"
-                "### 🔒 PII Risk\n- Redact names & address before publication."
-            ),
-            "Raw Reports": {
-                "Conflict Report": {
-                    "Conflicting Laws": [
-                        {"Rank": 1, "Similarity Score": 0.92, "Risk Level": "High",
-                         "Legal Provision": "Right to privacy & Data Minimization (DPDP)"}
-                    ]
-                },
-                "Bias Report": {
-                    "flagged_phrases": [
-                        {"phrase": "bank account numbers", "lexicon": "exclusionary"},
-                        {"phrase": "high-speed fiber only", "lexicon": "accessibility"},
-                    ]
-                },
-                "PII Report": {
-                    "status": "PII Found",
-                    "detected_items": [
-                        {"type": "Name", "value": "Mr. Rajesh Kumar"},
-                        {"type": "Address", "value": "Mandi Road, Dehradun 248001"},
-                    ]
-                }
-            },
-            "generated_at": now
-        }
+# Import engine
+from vidhik_engine import analyze_policy
 
+# ===============================
+# PAGE CONFIG + SIDEBAR TOGGLER
+# ===============================
 
-# ---------------------------
-# PDF GENERATOR
-# ---------------------------
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib.pagesizes import A4
-from reportlab.lib.units import cm
+# Sidebar toggle session
+if "sidebar_state" not in st.session_state:
+    st.session_state["sidebar_state"] = "expanded"
 
-def create_pdf_from_report(report: dict):
-    buffer = io.BytesIO()
+# --- SIDEBAR TOGGLE BUTTON ---
+with st.container():
+    if st.button("☰ Menu"):
+        st.session_state["sidebar_state"] = (
+            "collapsed" if st.session_state["sidebar_state"] == "expanded" else "expanded"
+        )
 
-    doc = SimpleDocTemplate(
-        buffer,
-        pagesize=A4,
-        topMargin=2*cm,
-        bottomMargin=2*cm,
-        leftMargin=2*cm,
-        rightMargin=2*cm
-    )
-
-    styles = getSampleStyleSheet()
-    story = []
-
-    story.append(Paragraph("<b>Vidhik AI – Policy Audit Report</b>", styles["Title"]))
-    story.append(Spacer(1, 16))
-
-    # Overall Status
-    status = report.get("Overall Status", "Unknown")
-    story.append(Paragraph(f"<b>Overall Status:</b> {status}", styles["Heading2"]))
-    story.append(Spacer(1, 10))
-
-    # Executive Summary
-    story.append(Paragraph("<b>Executive Summary</b>", styles["Heading2"]))
-    story.append(Paragraph(report.get("Executive Summary", "No summary"), styles["Normal"]))
-    story.append(Spacer(1, 12))
-
-    # Recommendations
-    story.append(Paragraph("<b>Actionable Recommendations</b>", styles["Heading2"]))
-    rec_html = report.get("Actionable Recommendations", "None").replace("\n", "<br/>")
-    story.append(Paragraph(rec_html, styles["Normal"]))
-    story.append(Spacer(1, 12))
-
-    # Raw Reports
-    story.append(Paragraph("<b>Raw Reports</b>", styles["Heading2"]))
-
-    for k, v in report.get("Raw Reports", {}).items():
-        story.append(Paragraph(f"<b>{k}</b>", styles["Heading3"]))
-        v_json = json.dumps(v, indent=2).replace("\n", "<br/>")
-        story.append(Paragraph(v_json, styles["Code"]))
-        story.append(Spacer(1, 12))
-
-    doc.build(story)
-    pdf_data = buffer.getvalue()
-    buffer.close()
-    return pdf_data
-
-
-# ---------------------------
-# PAGE CONFIG
-# ---------------------------
+# Apply sidebar state
 st.set_page_config(
-    page_title="Vidhik AI — Governance Gateway",
+    page_title="Vidhik AI: Governance Gateway",
     page_icon="⚖️",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state=st.session_state["sidebar_state"]
 )
 
+# ===============================
+# HEADER
+# ===============================
 
-# ---------------------------
-# CSS
-# ---------------------------
-st.markdown(
-    """
-    <style>
-    .top-nav {
-        background: linear-gradient(90deg,#0D47A1,#1565C0,#1976D2);
-        padding: 14px 20px;
-        color: white;
-        border-radius: 8px;
-        font-size: 20px;
-        font-weight: 700;
-        box-shadow: 0 6px 16px rgba(13,71,161,0.25);
-    }
-    .subtitle {
-        font-size: 13px;
-        opacity: 0.9;
-        margin-top: -6px;
-    }
-    .card {
-        background: white;
-        padding: 18px;
-        border-radius: 10px;
-        box-shadow: 0 4px 14px rgba(0,0,0,0.08);
-        margin-bottom: 20px;
-    }
-    .muted {
-        color: #546E7A;
-        font-size: 13px;
-    }
-    .metric-value {
-        font-size: 22px;
-        font-weight: 700;
-        color: #0D47A1;
-    }
-    .metric-title {
-        font-size: 13px;
-        color: #607D8B;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+st.title("⚖️ Vidhik AI: The Compliance-First Policy Audit")
+st.markdown("### The Governance Gateway for the Government of Uttarakhand")
+st.info("Upload your policy draft (or use the sample text) and click 'Run Audit' to instantly check for legal conflicts, PII risks, and policy bias.")
 
-# ---------------------------
-# TOP NAV
-# ---------------------------
-st.markdown("<div class='top-nav'>⚖️ Vidhik AI — Governance Gateway</div>", unsafe_allow_html=True)
+# ===============================
+# SIDEBAR STATIC INFO
+# ===============================
 
-
-# ---------------------------
-# SIDEBAR
-# ---------------------------
 with st.sidebar:
-    st.header("🧭 Navigation")
-    nav = st.radio("", ["Dashboard", "New Audit", "Settings", "About"])
-    st.markdown("---")
-    st.caption("Compliance Framework: DPDP • IT Act • Constitutional Principles")
+    st.title("Vidhik AI Architecture")
+    st.markdown("**Phase 1: Privacy & PII Check**")
+    st.markdown("• DPDP Act Redaction Layer")
+    st.markdown("**Phase 2: Legal Analyzer**")
+    st.markdown("• Semantic Conflict Detection (FAISS)")
+    st.markdown("**Phase 3: Ethical Auditor**")
+    st.markdown("• Bias & Inclusivity Scan")
 
+# ===============================
+# PLACEHOLDER POLICY TEXT
+# ===============================
 
-# ---------------------------
-# ROUTES
-# ---------------------------
+placeholder_policy = """
+[Draft Policy: GO for Digital Service Delivery Platform (DSDP)]
 
-# ------------------ DASHBOARD ------------------
-if nav == "Dashboard":
-    st.subheader("Overview")
-    st.markdown("<div class='muted'>Your recent policy audits and analytics summary.</div>", unsafe_allow_html=True)
+[Clause 3.0: Citizen Enrollment]
+All citizens of the state must register their personal details and bank account numbers on the DSDP. Citizens shall, in all instances, only use their Aadhar ID and provide scanned copies of their current utility bill. Mr. Rajesh Kumar, residing at Mandi Road, Dehradun 248001, will be the initial contact for technical queries.
 
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.markdown("<div class='card'>", unsafe_allow_html=True)
-        st.markdown("<div class='metric-title'>Total Audits</div>", unsafe_allow_html=True)
-        st.markdown("<div class='metric-value'>42</div>", unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
-    with col2:
-        st.markdown("<div class='card'>", unsafe_allow_html=True)
-        st.markdown("<div class='metric-title'>High Risk</div>", unsafe_allow_html=True)
-        st.markdown("<div class='metric-value'>7</div>", unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
-    with col3:
-        st.markdown("<div class='card'>", unsafe_allow_html=True)
-        st.markdown("<div class='metric-title'>Medium Risk</div>", unsafe_allow_html=True)
-        st.markdown("<div class='metric-value'>18</div>", unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
+[Clause 4.1: Data Handling Protocol]
+Data collected via the DSDP will be stored on a private server maintained by the department. Personal data, including the Aadhar ID, may be retained indefinitely and shared with any other state department upon simple request.
 
-    # Chart
-    months = pd.date_range(end=pd.Timestamp.today(), periods=6, freq="M").strftime("%b")
-    vals = np.random.randint(3, 12, size=6)
-    fig, ax = plt.subplots(figsize=(6, 3))
-    ax.plot(months, vals, marker="o")
-    ax.grid(alpha=0.3)
-    st.pyplot(fig)
+[Clause 5.0: Access and Availability]
+Access to DSDP services is restricted solely to citizens who can reliably interface using dedicated, high-speed fiber-optic internet connections and advanced desktop computing hardware.
+"""
 
+# ===============================
+# MAIN INPUT TEXT AREA
+# ===============================
 
-# ------------------ NEW AUDIT ------------------
-elif nav == "New Audit":
-    st.subheader("New Policy Audit")
-    st.markdown("<div class='muted'>Paste or upload a draft policy to begin the analysis.</div>", unsafe_allow_html=True)
+policy_input = st.text_area(
+    "Policy Draft to Audit:",
+    value=placeholder_policy,
+    height=400,
+    help="Review and edit the policy text before running the audit"
+)
 
-    text = st.text_area("Policy Text", height=300)
+# ===============================
+# FILE UPLOAD (NOW IN MAIN PAGE)
+# ===============================
 
-    uploaded = st.file_uploader("Upload File", type=["txt", "pdf", "docx", "doc"])
-    if uploaded:
-        try:
-            if uploaded.type == "text/plain":
-                text = str(uploaded.read(), "utf-8")
-            elif uploaded.type == "application/pdf":
+st.markdown("### 📁 Upload Policy Document")
+
+uploaded_file = st.file_uploader(
+    "Choose a file",
+    type=['txt', 'pdf', 'docx', 'doc'],
+    help="Upload your policy document (TXT, PDF, DOCX, DOC)"
+)
+
+# Process uploaded file
+if uploaded_file:
+    try:
+        if uploaded_file.type == "text/plain":
+            policy_input = str(uploaded_file.read(), "utf-8")
+
+        elif uploaded_file.type == "application/pdf":
+            try:
                 import PyPDF2
-                reader = PyPDF2.PdfReader(uploaded)
-                text = "\n".join([p.extract_text() for p in reader.pages])
-            else:
+                reader = PyPDF2.PdfReader(uploaded_file)
+                pdf_text = ""
+                for page in reader.pages:
+                    pdf_text += page.extract_text() + "\n"
+                policy_input = pdf_text
+            except:
+                st.warning("Install PyPDF2 to read PDF files.")
+
+        elif uploaded_file.type in ["application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                    "application/msword"]:
+            try:
                 import docx
-                doc = docx.Document(uploaded)
+                doc = docx.Document(uploaded_file)
                 text = "\n".join([p.text for p in doc.paragraphs])
-        except:
-            st.error("Failed to read uploaded file.")
+                policy_input = text
+            except:
+                st.warning("Install python-docx to read DOCX files.")
+    except Exception as e:
+        st.error(f"Error reading file: {e}")
 
-    if st.button("🚀 Run Vidhik AI Audit"):
-        if not text.strip():
-            st.error("Enter or upload policy text first.")
-        else:
-            with st.spinner("Analyzing..."):
-                report = analyze_policy(text)
-                st.session_state["report"] = report
-            st.success("Audit Completed!")
+# ===============================
+# RUN AUDIT BUTTON
+# ===============================
 
-    # If report exists, show buttons
-    if "report" in st.session_state:
-        rep = st.session_state["report"]
+if st.button("🚀 Run Vidhik AI Audit", type="primary"):
+    if not policy_input.strip():
+        st.error("Please enter some policy text to analyze.")
+        st.stop()
 
-        st.subheader("Audit Result")
-        st.write(f"**Status:** {rep.get('Overall Status')}")
+    try:
+        with st.spinner("Analyzing policy..."):
+            final_report = analyze_policy(policy_input)
+        st.session_state['report'] = final_report
+        st.success("Audit completed successfully!")
+    except Exception as e:
+        st.error(f"Error during audit: {e}")
+        st.stop()
 
-        pdf_file = create_pdf_from_report(rep)
+# ===============================
+# REPORT DISPLAY
+# ===============================
 
-        st.download_button(
-            "📄 Download PDF Report",
-            data=pdf_file,
-            file_name="VidhikAI_Audit_Report.pdf",
-            mime="application/pdf"
-        )
+if "report" in st.session_state:
+    report = st.session_state['report']
+    st.markdown("---")
 
-        st.download_button(
-            "📥 Download JSON Report",
-            data=json.dumps(rep, indent=2),
-            file_name="VidhikAI_Audit_Report.json",
-            mime="application/json"
-        )
+    # Status
+    overall_status = report.get("Overall Status", "Unknown")
+    if overall_status in ["Clean", "Low Risk"]:
+        st.success(f"## Policy Status: {overall_status}")
+    elif overall_status in ["High Risk", "Database Error", "Processing Error"]:
+        st.error(f"## POLICY ALERT: {overall_status}")
+    elif overall_status == "Medium Risk":
+        st.warning(f"## Policy Status: {overall_status}")
+    else:
+        st.info(f"## Policy Status: {overall_status}")
 
-        with st.expander("View Full Report JSON"):
-            st.json(rep)
+    # Executive Summary
+    st.header("Executive Summary")
+    st.markdown(report.get("Executive Summary", "No summary provided."))
 
+    st.markdown("---")
 
-# ------------------ SETTINGS ------------------
-elif nav == "Settings":
-    st.subheader("Settings")
-    st.write("No advanced settings yet.")
+    # Tabs
+    tab1, tab2, tab3 = st.tabs(["⚖ Legal Conflicts", "🌍 Policy Bias", "🔐 PII & Data Risk"])
 
+    # Tab 1 - Legal
+    with tab1:
+        st.subheader("Legal Conflicts and Compliance Issues")
+        st.markdown(report.get("Actionable Recommendations", ""))
 
-# ------------------ ABOUT ------------------
-elif nav == "About":
-    st.subheader("About Vidhik AI")
-    st.write("Government-grade policy compliance auditor for Uttarakhand.")
-    st.write("Built with DPDP Act, IT Act and constitutional principles.")
+    # Tab 2 - Bias
+    with tab2:
+        st.subheader("Ethical Audit")
+        bias = report.get("Raw Reports", {}).get("Bias Report", {})
+        st.json(bias)
 
+    # Tab 3 - PII
+    with tab3:
+        st.subheader("PII Risk Analysis")
+        pii = report.get("Raw Reports", {}).get("PII Report", {})
+        st.json(pii)
 
+    # Raw report
+    with st.expander("📊 Full Raw Report"):
+        st.json(report)
+
+# FOOTER
 st.markdown("---")
-st.caption("Vidhik AI • Government of Uttarakhand • 2025")
+st.markdown("**Vidhik AI** | Government of Uttarakhand | DPDP Act 2023 | IT Act 2000")
