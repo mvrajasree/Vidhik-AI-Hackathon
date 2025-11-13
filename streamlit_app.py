@@ -21,7 +21,7 @@ import io
 import tempfile
 from datetime import datetime
 import pandas as pd
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import numpy as np
 
 # Try import of real engine; if missing, fallback to demo analyzer
