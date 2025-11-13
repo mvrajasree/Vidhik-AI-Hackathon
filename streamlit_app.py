@@ -1,27 +1,16 @@
 import streamlit as st
 import json
-import tempfile
 import os
 
-# Import engine
 from vidhik_engine import analyze_policy
 
-# ===============================
-# PAGE CONFIG + SIDEBAR TOGGLER
-# ===============================
+# ==========================================
+# PAGE CONFIG + SIDEBAR STATE
+# ==========================================
 
-# Sidebar toggle session
 if "sidebar_state" not in st.session_state:
     st.session_state["sidebar_state"] = "expanded"
 
-# --- SIDEBAR TOGGLE BUTTON ---
-with st.container():
-    if st.button("☰ Menu"):
-        st.session_state["sidebar_state"] = (
-            "collapsed" if st.session_state["sidebar_state"] == "expanded" else "expanded"
-        )
-
-# Apply sidebar state
 st.set_page_config(
     page_title="Vidhik AI: Governance Gateway",
     page_icon="⚖️",
@@ -29,30 +18,121 @@ st.set_page_config(
     initial_sidebar_state=st.session_state["sidebar_state"]
 )
 
-# ===============================
+# ==========================================
+# CUSTOM DYNAMIC CSS
+# ==========================================
+
+st.markdown(
+    """
+    <style>
+    /* Smooth UI Styling */
+
+    body {
+        background-color: #F7F9FC;
+    }
+
+    .main-title {
+        font-size: 42px;
+        font-weight: 700;
+        margin-bottom: -10px;
+        color: #1A237E;
+    }
+
+    .sub-title {
+        font-size: 20px;
+        color: #3949AB;
+        margin-bottom: 20px;
+    }
+
+    /* Glass-card container */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.55);
+        padding: 20px 25px;
+        border-radius: 16px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+        backdrop-filter: blur(8px);
+        margin-bottom: 20px;
+    }
+
+    /* Rounded buttons */
+    .stButton > button {
+        border-radius: 10px;
+        padding: 10px 25px;
+        font-size: 17px;
+        background-color: #303F9F;
+        color: white;
+        border: none;
+    }
+
+    .stButton > button:hover {
+        background-color: #1A237E;
+        color: white;
+    }
+
+    /* Center file uploader */
+    .file-uploader {
+        display: flex;
+        justify-content: center;
+        margin-top: -15px;
+        margin-bottom: 15px;
+    }
+
+    /* Sidebar toggle button */
+    #menu-button {
+        position: fixed;
+        top: 18px;
+        left: 18px;
+        z-index: 9999;
+        background: #1A237E;
+        color: white;
+        border-radius: 8px;
+        padding: 8px 12px;
+        cursor: pointer;
+        font-size: 22px;
+    }
+    #menu-button:hover {
+        background: #000051;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+# ==========================================
+# SIDEBAR TOGGLE
+# ==========================================
+
+menu_placeholder = st.empty()
+if menu_placeholder.button("☰", key="menu", help="Toggle Menu"):
+    st.session_state["sidebar_state"] = (
+        "collapsed" if st.session_state["sidebar_state"] == "expanded" else "expanded"
+    )
+    st.rerun()
+
+# ==========================================
 # HEADER
-# ===============================
+# ==========================================
 
-st.title("⚖️ Vidhik AI: The Compliance-First Policy Audit")
-st.markdown("### The Governance Gateway for the Government of Uttarakhand")
-st.info("Upload your policy draft (or use the sample text) and click 'Run Audit' to instantly check for legal conflicts, PII risks, and policy bias.")
+st.markdown("<h1 class='main-title'>⚖️ Vidhik AI: Policy Audit System</h1>", unsafe_allow_html=True)
+st.markdown("<p class='sub-title'>Governance Gateway for Uttarakhand</p>", unsafe_allow_html=True)
+st.info("Upload your policy draft and click Run Audit to check for legal conflicts, PII leakage and policy bias.")
 
-# ===============================
-# SIDEBAR STATIC INFO
-# ===============================
+# ==========================================
+# SIDEBAR CONTENT
+# ==========================================
 
 with st.sidebar:
-    st.title("Vidhik AI Architecture")
-    st.markdown("**Phase 1: Privacy & PII Check**")
-    st.markdown("• DPDP Act Redaction Layer")
-    st.markdown("**Phase 2: Legal Analyzer**")
-    st.markdown("• Semantic Conflict Detection (FAISS)")
-    st.markdown("**Phase 3: Ethical Auditor**")
-    st.markdown("• Bias & Inclusivity Scan")
+    st.title("📚 Architecture Overview")
+    st.markdown("### 🔐 Phase 1: Privacy Gatekeeper")
+    st.markdown("- PII Detection & Redaction (DPDP Act)")
+    st.markdown("### ⚖ Phase 2: Legal Analyzer")
+    st.markdown("- Semantic Conflict Check (FAISS + Acts DB)")
+    st.markdown("### 🌍 Phase 3: Ethical Auditor")
+    st.markdown("- Bias & Inclusivity Review")
 
-# ===============================
-# PLACEHOLDER POLICY TEXT
-# ===============================
+# ==========================================
+# INPUT AREA
+# ==========================================
 
 placeholder_policy = """
 [Draft Policy: GO for Digital Service Delivery Platform (DSDP)]
@@ -67,125 +147,111 @@ Data collected via the DSDP will be stored on a private server maintained by the
 Access to DSDP services is restricted solely to citizens who can reliably interface using dedicated, high-speed fiber-optic internet connections and advanced desktop computing hardware.
 """
 
-# ===============================
-# MAIN INPUT TEXT AREA
-# ===============================
-
+st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
 policy_input = st.text_area(
     "Policy Draft to Audit:",
     value=placeholder_policy,
-    height=400,
-    help="Review and edit the policy text before running the audit"
+    height=300
 )
+st.markdown("</div>", unsafe_allow_html=True)
 
-# ===============================
-# FILE UPLOAD (NOW IN MAIN PAGE)
-# ===============================
+# ==========================================
+# FILE UPLOADER (CENTERED)
+# ==========================================
 
-st.markdown("### 📁 Upload Policy Document")
-
+st.markdown("<div class='file-uploader'>", unsafe_allow_html=True)
 uploaded_file = st.file_uploader(
-    "Choose a file",
+    "",
     type=['txt', 'pdf', 'docx', 'doc'],
-    help="Upload your policy document (TXT, PDF, DOCX, DOC)"
 )
+st.markdown("</div>", unsafe_allow_html=True)
 
-# Process uploaded file
 if uploaded_file:
     try:
         if uploaded_file.type == "text/plain":
             policy_input = str(uploaded_file.read(), "utf-8")
 
         elif uploaded_file.type == "application/pdf":
-            try:
-                import PyPDF2
-                reader = PyPDF2.PdfReader(uploaded_file)
-                pdf_text = ""
-                for page in reader.pages:
-                    pdf_text += page.extract_text() + "\n"
-                policy_input = pdf_text
-            except:
-                st.warning("Install PyPDF2 to read PDF files.")
+            import PyPDF2
+            reader = PyPDF2.PdfReader(uploaded_file)
+            text = ""
+            for page in reader.pages:
+                text += page.extract_text() + "\n"
+            policy_input = text
 
         elif uploaded_file.type in ["application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                                     "application/msword"]:
-            try:
-                import docx
-                doc = docx.Document(uploaded_file)
-                text = "\n".join([p.text for p in doc.paragraphs])
-                policy_input = text
-            except:
-                st.warning("Install python-docx to read DOCX files.")
+            import docx
+            doc = docx.Document(uploaded_file)
+            policy_input = "\n".join([p.text for p in doc.paragraphs])
+
     except Exception as e:
         st.error(f"Error reading file: {e}")
 
-# ===============================
-# RUN AUDIT BUTTON
-# ===============================
+# ==========================================
+# RUN BUTTON
+# ==========================================
 
-if st.button("🚀 Run Vidhik AI Audit", type="primary"):
+st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
+run_button = st.button("🚀 Run Vidhik AI Audit")
+st.markdown("</div>", unsafe_allow_html=True)
+
+# ==========================================
+# AUDIT PROCESS
+# ==========================================
+
+if run_button:
     if not policy_input.strip():
-        st.error("Please enter some policy text to analyze.")
+        st.error("Please enter some policy text.")
         st.stop()
+    with st.spinner("Analyzing Policy..."):
+        report = analyze_policy(policy_input)
+        st.session_state["report"] = report
+    st.success("Audit Completed!")
 
-    try:
-        with st.spinner("Analyzing policy..."):
-            final_report = analyze_policy(policy_input)
-        st.session_state['report'] = final_report
-        st.success("Audit completed successfully!")
-    except Exception as e:
-        st.error(f"Error during audit: {e}")
-        st.stop()
-
-# ===============================
-# REPORT DISPLAY
-# ===============================
+# ==========================================
+# OUTPUT RESULTS
+# ==========================================
 
 if "report" in st.session_state:
-    report = st.session_state['report']
-    st.markdown("---")
+    report = st.session_state["report"]
 
-    # Status
-    overall_status = report.get("Overall Status", "Unknown")
-    if overall_status in ["Clean", "Low Risk"]:
-        st.success(f"## Policy Status: {overall_status}")
-    elif overall_status in ["High Risk", "Database Error", "Processing Error"]:
-        st.error(f"## POLICY ALERT: {overall_status}")
-    elif overall_status == "Medium Risk":
-        st.warning(f"## Policy Status: {overall_status}")
+    st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
+
+    status = report.get("Overall Status", "Unknown")
+
+    if status in ["Clean", "Low Risk"]:
+        st.success(f"Policy Status: {status}")
+    elif status == "Medium Risk":
+        st.warning(f"Policy Status: {status}")
     else:
-        st.info(f"## Policy Status: {overall_status}")
+        st.error(f"Policy Status: {status}")
 
-    # Executive Summary
     st.header("Executive Summary")
-    st.markdown(report.get("Executive Summary", "No summary provided."))
+    st.write(report.get("Executive Summary", "No summary available."))
 
-    st.markdown("---")
+    st.markdown("</div>", unsafe_allow_html=True)
 
-    # Tabs
-    tab1, tab2, tab3 = st.tabs(["⚖ Legal Conflicts", "🌍 Policy Bias", "🔐 PII & Data Risk"])
+    tab1, tab2, tab3 = st.tabs(["⚖ Legal", "🌍 Bias", "🔐 PII"])
 
-    # Tab 1 - Legal
     with tab1:
-        st.subheader("Legal Conflicts and Compliance Issues")
-        st.markdown(report.get("Actionable Recommendations", ""))
+        st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
+        st.subheader("Legal Conflict Report")
+        st.json(report.get("Raw Reports", {}).get("Conflict Report", {}))
+        st.markdown("</div>", unsafe_allow_html=True)
 
-    # Tab 2 - Bias
     with tab2:
-        st.subheader("Ethical Audit")
-        bias = report.get("Raw Reports", {}).get("Bias Report", {})
-        st.json(bias)
+        st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
+        st.subheader("Bias Analysis")
+        st.json(report.get("Raw Reports", {}).get("Bias Report", {}))
+        st.markdown("</div>", unsafe_allow_html=True)
 
-    # Tab 3 - PII
     with tab3:
-        st.subheader("PII Risk Analysis")
-        pii = report.get("Raw Reports", {}).get("PII Report", {})
-        st.json(pii)
-
-    # Raw report
-    with st.expander("📊 Full Raw Report"):
-        st.json(report)
+        st.markdown("<div class='glass-card'>", unsafe_allow_html=True)
+        st.subheader("PII Audit Report")
+        st.json(report.get("Raw Reports", {}).get("PII Report", {}))
+        st.markdown("</div>", unsafe_allow_html=True)
 
 # FOOTER
 st.markdown("---")
-st.markdown("**Vidhik AI** | Government of Uttarakhand | DPDP Act 2023 | IT Act 2000")
+st.markdown("**Vidhik AI** • Government of Uttarakhand • DPDP Act 2023 • IT Act 2000")
