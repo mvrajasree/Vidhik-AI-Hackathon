@@ -14,7 +14,7 @@ st.set_page_config(
 )
 
 # ==========================
-# DARK THEME COMPATIBLE STYLING
+# CLEAN STYLING
 # ==========================
 
 st.markdown("""
@@ -47,28 +47,12 @@ st.markdown("""
         font-weight: 600;
         font-size: 1.4rem;
     }
-    .dark-theme-header {
-        border-bottom: 2px solid #4a90e2;
-        padding-bottom: 0.5rem;
-        margin-bottom: 1rem;
-        color: #4a90e2 !important;
-        font-weight: 600;
-        font-size: 1.4rem;
-    }
     .action-card {
         background-color: #f8fafc;
         padding: 1.5rem;
         border-radius: 10px;
         border-left: 4px solid #1e3c72;
         margin-bottom: 1rem;
-    }
-    .dark-action-card {
-        background-color: #2d3748;
-        padding: 1.5rem;
-        border-radius: 10px;
-        border-left: 4px solid #4a90e2;
-        margin-bottom: 1rem;
-        color: white;
     }
     .stButton button {
         border-radius: 8px;
@@ -87,14 +71,6 @@ st.markdown("""
         margin: 0.5rem 0;
         color: #22543d;
     }
-    .dark-success-msg {
-        background-color: #22543d;
-        border: 1px solid #48bb78;
-        border-radius: 8px;
-        padding: 0.75rem;
-        margin: 0.5rem 0;
-        color: white;
-    }
     .report-section {
         background-color: white;
         padding: 1.5rem;
@@ -103,36 +79,18 @@ st.markdown("""
         margin: 1rem 0;
         border: 1px solid #e2e8f0;
     }
-    .dark-report-section {
-        background-color: #2d3748;
-        padding: 1.5rem;
-        border-radius: 10px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
-        margin: 1rem 0;
-        border: 1px solid #4a5568;
-        color: white;
+    .compact-section {
+        margin: 0.5rem 0;
+        padding: 0;
     }
-    .subsection-header {
-        color: #2d3748 !important;
-        font-weight: 600;
-        font-size: 1.2rem;
-        margin-bottom: 1rem;
+    /* Remove extra padding from Streamlit elements */
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
     }
-    .dark-subsection-header {
-        color: #e2e8f0 !important;
-        font-weight: 600;
-        font-size: 1.2rem;
-        margin-bottom: 1rem;
-    }
-    .control-header {
-        color: #2d3748 !important;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-    }
-    .dark-control-header {
-        color: #e2e8f0 !important;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
+    .stTextArea textarea {
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -151,7 +109,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.info("📋 Upload your policy draft or use the sample text below to conduct a comprehensive compliance audit for legal conflicts, PII risks, and policy bias.")
+st.info("📋 Upload your policy draft or use the sample text below to conduct a comprehensive compliance audit.")
 
 # ==========================
 # SIMPLIFIED PDF GENERATOR
@@ -238,12 +196,12 @@ def analyze_policy(policy_text):
     }
 
 # ==========================
-# PROFESSIONAL SIDEBAR
+# CLEAN SIDEBAR
 # ==========================
 
 st.sidebar.markdown(
     """
-    <div style='text-align: center; margin-bottom: 2rem;'>
+    <div style='text-align: center; margin-bottom: 1rem;'>
         <h3 style='color: #1e3c72;'>🔍 Navigation</h3>
     </div>
     """,
@@ -263,11 +221,11 @@ with st.sidebar.expander("🏛️ System Architecture", expanded=False):
     """)
 
 st.sidebar.markdown("---")
-st.sidebar.markdown("### 📊 Quick Stats")
+st.sidebar.markdown("**📊 Quick Stats**")
 st.sidebar.info("""
-**Audits Completed:** 127  
-**Avg. Processing Time:** 2.3s  
-**Compliance Rate:** 89%
+Audits Completed: 127  
+Processing Time: 2.3s  
+Compliance Rate: 89%
 """)
 
 # ==========================
@@ -288,52 +246,48 @@ Access to DSDP services is restricted solely to citizens who can reliably interf
 """
 
 # ==========================
-# MAIN CONTENT AREA
+# COMPACT MAIN CONTENT AREA
 # ==========================
 
-st.markdown('<div class="section-header">Policy Document Analysis</div>', unsafe_allow_html=True)
+st.markdown("### Policy Document Analysis")
 
 col1, col2 = st.columns([3, 1])
 
 with col1:
-    st.markdown("#### 📝 Policy Draft to Audit")
+    st.markdown("**Policy Draft to Audit**")
     policy_input = st.text_area(
         "Policy Draft to Audit:",
         value=placeholder_policy,
-        height=400,
+        height=350,
         label_visibility="collapsed"
     )
 
 with col2:
-    st.markdown("#### 📎 Document Controls")
-    with st.container():
-        st.markdown('<div class="action-card">', unsafe_allow_html=True)
-        uploaded_file = st.file_uploader(
-            "Upload Document",
-            type=['txt', 'pdf', 'docx', 'doc'],
-            help="Supported formats: TXT, PDF, DOCX, DOC"
-        )
-        if uploaded_file:
-            st.markdown(f'<div class="success-msg">✅ {uploaded_file.name}</div>', unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown("**Document Controls**")
+    uploaded_file = st.file_uploader(
+        "Upload Document",
+        type=['txt', 'pdf', 'docx', 'doc'],
+        help="Supported formats: TXT, PDF, DOCX, DOC"
+    )
+    if uploaded_file:
+        st.success(f"✅ {uploaded_file.name}")
 
 # ==========================
-# ACTION CONTROLS
+# COMPACT ACTION CONTROLS
 # ==========================
 
-st.markdown("### ⚙️ Analysis Controls")
+st.markdown("---")
+st.markdown("### Analysis Controls")
 
-action_col1, action_col2, action_col3 = st.columns([1, 1, 1])
+action_col1, action_col2, action_col3 = st.columns(3)
 
 with action_col1:
-    st.markdown("#### 📥 Data Input")
     use_sample = st.checkbox("Use sample policy", value=True)
     if st.button("🔄 Reset Text", use_container_width=True):
         st.session_state.clear()
         st.rerun()
 
 with action_col2:
-    st.markdown("#### 🔍 Audit Execution")
     run_audit = st.button(
         "🚀 Run Comprehensive Audit", 
         type="primary", 
@@ -342,14 +296,11 @@ with action_col2:
     )
 
 with action_col3:
-    st.markdown("#### 📊 Results Management")
     if st.session_state.get("report"):
         if st.button("🗑️ Clear Results", use_container_width=True, type="secondary"):
             st.session_state.pop("report", None)
             st.session_state.pop("report_text", None)
             st.rerun()
-    else:
-        st.info("No active report")
 
 # ==========================
 # AUDIT PROCESSING
@@ -397,112 +348,92 @@ if run_audit:
             st.error(f"❌ Analysis error: {e}")
 
 # ==========================
-# PROFESSIONAL REPORT DISPLAY
+# CLEAN REPORT DISPLAY
 # ==========================
 
 if "report" in st.session_state:
     report = st.session_state["report"]
     
     st.markdown("---")
-    st.markdown('<div class="section-header">📊 Audit Results</div>', unsafe_allow_html=True)
+    st.markdown("### 📊 Audit Results")
     
-    # Overall Status
-    st.markdown('<div class="report-section">', unsafe_allow_html=True)
-    status = report.get("Overall Status", "Unknown")
-    
+    # Overall Status - Compact
     status_col1, status_col2 = st.columns([1, 4])
     with status_col1:
-        st.markdown("##### 🎯 Compliance Status")
+        st.markdown("**Compliance Status**")
     with status_col2:
+        status = report.get("Overall Status", "Unknown")
         if "FAIL" in status.upper():
             st.error(f"**{status}**")
         elif "PASS" in status.upper():
             st.success(f"**{status}**")
         else:
             st.warning(f"**{status}**")
-    st.markdown('</div>', unsafe_allow_html=True)
 
-    # Executive Summary
-    st.markdown('<div class="report-section">', unsafe_allow_html=True)
-    st.markdown("##### 📋 Executive Summary")
+    # Executive Summary - Compact
+    st.markdown("**Executive Summary**")
     st.write(report.get("Executive Summary", "No summary available."))
-    st.markdown('</div>', unsafe_allow_html=True)
 
-    # Detailed Analysis
-    st.markdown("##### 🔍 Detailed Analysis")
+    # Detailed Analysis - Compact
+    st.markdown("**Detailed Analysis**")
     tab1, tab2, tab3 = st.tabs(["⚖️ Legal Compliance", "🌍 Bias Assessment", "🔐 Data Privacy"])
 
     with tab1:
-        st.markdown('<div class="report-section">', unsafe_allow_html=True)
-        st.markdown("###### Legal Compliance Report")
         conflict_data = report.get("Raw Reports", {}).get("Conflict Report", {})
         if conflict_data:
             st.json(conflict_data)
         else:
             st.info("No legal compliance issues detected")
-        st.markdown('</div>', unsafe_allow_html=True)
 
     with tab2:
-        st.markdown('<div class="report-section">', unsafe_allow_html=True)
-        st.markdown("###### Bias Assessment Report")
         bias_data = report.get("Raw Reports", {}).get("Bias Report", {})
         if bias_data:
             st.json(bias_data)
         else:
             st.info("No bias assessment data available")
-        st.markdown('</div>', unsafe_allow_html=True)
 
     with tab3:
-        st.markdown('<div class="report-section">', unsafe_allow_html=True)
-        st.markdown("###### Data Privacy Report")
         pii_data = report.get("Raw Reports", {}).get("PII Report", {})
         if pii_data:
             st.json(pii_data)
         else:
             st.info("No data privacy issues detected")
-        st.markdown('</div>', unsafe_allow_html=True)
 
-    # Export Section
+    # Export Section - Compact
     st.markdown("---")
-    st.markdown('<div class="section-header">📤 Report Export</div>', unsafe_allow_html=True)
+    st.markdown("### 📤 Export Results")
     
     export_col1, export_col2 = st.columns(2)
     
     with export_col1:
-        st.markdown('<div class="report-section">', unsafe_allow_html=True)
-        st.markdown("###### 📄 PDF Report")
-        st.markdown("Formatted audit report for official documentation")
+        st.markdown("**PDF Report**")
         pdf_bytes = create_pdf(report)
         if pdf_bytes:
             st.download_button(
-                label="Download PDF Report",
+                label="Download PDF",
                 data=pdf_bytes,
                 file_name="VidhikAI_Audit_Report.pdf",
                 mime="application/pdf",
                 use_container_width=True
             )
-        st.markdown('</div>', unsafe_allow_html=True)
 
     with export_col2:
-        st.markdown('<div class="report-section">', unsafe_allow_html=True)
-        st.markdown("###### 📊 Raw Data")
-        st.markdown("Complete dataset for further analysis")
+        st.markdown("**Raw Data**")
         json_str = json.dumps(report, indent=2)
         st.download_button(
-            label="Download JSON Data",
+            label="Download JSON",
             data=json_str,
             file_name="VidhikAI_Audit_Data.json",
             mime="application/json",
             use_container_width=True
         )
-        st.markdown('</div>', unsafe_allow_html=True)
 
     # Raw Data View
-    with st.expander("🔍 View Complete Dataset"):
+    with st.expander("View Complete Dataset"):
         st.json(report)
 
 # ==========================
-# PROFESSIONAL FOOTER
+# CLEAN FOOTER
 # ==========================
 
 st.markdown("---")
