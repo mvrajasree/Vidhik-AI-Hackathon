@@ -278,6 +278,11 @@ with col2:
 
 st.markdown("---")
 
+# Initialize variables
+reset_clicked = False
+clear_clicked = False
+run_audit = False
+
 # Create a container for aligned buttons
 button_col1, button_col2, button_col3 = st.columns([1, 2, 1])
 
