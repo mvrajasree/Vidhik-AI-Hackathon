@@ -16,8 +16,15 @@ st.set_page_config(
 FAIL_COLOR = "#FF4B4B"
 PASS_COLOR = "#00BFA5"
 
-st.title("⚖️ Vidhik AI: The Compliance-First Policy Audit")
-st.markdown("### The Governance Gateway for the Government of Uttarakhand")
+# ==========================
+# CENTERED TITLE
+# ==========================
+
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    st.title("⚖️ Vidhik AI")
+    st.markdown("### The Governance Gateway for the Government of Uttarakhand")
+    
 st.info("Upload your policy draft (or use the sample text) and click 'Run Audit' to instantly check for legal conflicts, PII risks, and policy bias.")
 
 # ==========================
@@ -177,82 +184,81 @@ def process_docx_file(uploaded_file):
         return None
 
 # ==========================
-# FILE UPLOAD SECTION (MOVED TO MAIN AREA)
-# ==========================
-
-st.markdown("---")
-st.subheader("📁 Upload Policy Document")
-
-uploaded_file = st.file_uploader(
-    "Choose a file",
-    type=['txt', 'pdf', 'docx', 'doc'],
-    help="Upload your policy document"
-)
-
-# ==========================
-# FILE PROCESSING
-# ==========================
-
-input_text = ""
-if uploaded_file:
-    try:
-        st.success(f"Uploaded: {uploaded_file.name}")
-
-        if uploaded_file.type == "text/plain":
-            input_text = str(uploaded_file.read(), "utf-8")
-
-        elif uploaded_file.type == "application/pdf":
-            import PyPDF2
-            reader = PyPDF2.PdfReader(uploaded_file)
-            input_text = "\n".join([page.extract_text() for page in reader.pages])
-
-        elif uploaded_file.type in ["application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                                    "application/msword"]:
-            import docx
-            doc = docx.Document(uploaded_file)
-            input_text = "\n".join([p.text for p in doc.paragraphs])
-
-    except Exception as e:
-        st.error(f"File error: {e}")
-        input_text = placeholder_policy
-
-else:
-    input_text = placeholder_policy
-
-# ==========================
 # MAIN TEXT AREA (ORIGINAL FROM FIRST CODE)
 # ==========================
 
 policy_input = st.text_area(
     "Policy Draft to Audit:",
-    value=input_text,
+    value=placeholder_policy,
     height=400
 )
 
 # ==========================
-# RUN BUTTON SECTION
+# UPLOAD BUTTON AND RUN BUTTON SECTION (SIDE BY SIDE)
 # ==========================
 
-if st.button("🚀 Run Vidhik AI Audit", type="primary"):
-    if not policy_input.strip():
-        st.error("Enter policy text first.")
-        st.stop()
+col1, col2 = st.columns(2)
 
-    with st.spinner("Analyzing..."):
-        try:
-            # Try to import the real analyzer, fall back to mock
+with col1:
+    # Upload Policy Document as a button
+    uploaded_file = st.file_uploader(
+        "📁 Upload Policy Document",
+        type=['txt', 'pdf', 'docx', 'doc'],
+        help="Upload your policy document"
+    )
+
+with col2:
+    # Run Audit Button
+    if st.button("🚀 Run Vidhik AI Audit", type="primary", use_container_width=True):
+        # Process uploaded file if any
+        input_text = ""
+        if uploaded_file:
             try:
-                from vidhik_engine import analyze_policy as real_analyze_policy
-                final_report = real_analyze_policy(policy_input)
-            except ImportError:
-                st.warning("Using mock analysis - vidhik_engine not available")
-                final_report = analyze_policy(policy_input)
-            
-            st.session_state["report"] = final_report
-            st.success("Audit Complete!")
-        except Exception as e:
-            st.error(f"Error: {e}")
+                st.success(f"Uploaded: {uploaded_file.name}")
+
+                if uploaded_file.type == "text/plain":
+                    input_text = str(uploaded_file.read(), "utf-8")
+
+                elif uploaded_file.type == "application/pdf":
+                    import PyPDF2
+                    reader = PyPDF2.PdfReader(uploaded_file)
+                    input_text = "\n".join([page.extract_text() for page in reader.pages])
+
+                elif uploaded_file.type in ["application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                            "application/msword"]:
+                    import docx
+                    doc = docx.Document(uploaded_file)
+                    input_text = "\n".join([p.text for p in doc.paragraphs])
+
+                # Use uploaded file content
+                final_text = input_text if input_text else policy_input
+            except Exception as e:
+                st.error(f"File error: {e}")
+                final_text = policy_input
+        else:
+            # Use text area content
+            final_text = policy_input
+
+        if not final_text.strip():
+            st.error("Enter policy text first.")
             st.stop()
+
+        with st.spinner("Analyzing..."):
+            try:
+                # Try to import the real analyzer, fall back to mock
+                try:
+                    from vidhik_engine import analyze_policy as real_analyze_policy
+                    final_report = real_analyze_policy(final_text)
+                except ImportError:
+                    st.warning("Using mock analysis - vidhik_engine not available")
+                    final_report = analyze_policy(final_text)
+                
+                st.session_state["report"] = final_report
+                st.session_state["report_text"] = final_text
+                st.success("Audit Complete!")
+            except Exception as e:
+                st.error(f"Error: {e}")
+                st.stop()
 
 # ==========================
 # REPORT DISPLAY + PDF EXPORT
@@ -293,6 +299,12 @@ if "report" in st.session_state:
         file_name="VidhikAI_Audit_Report.pdf",
         mime="application/pdf"
     )
+
+    # ---- CLEAR REPORT BUTTON ----
+    if st.button("🗑️ Clear Current Report", type="secondary"):
+        st.session_state.pop("report", None)
+        st.session_state.pop("report_text", None)
+        st.rerun()
 
     # ---- RAW JSON VIEW ----
     with st.expander("View Raw JSON"):
