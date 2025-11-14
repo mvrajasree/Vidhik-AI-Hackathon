@@ -20,11 +20,16 @@ PASS_COLOR = "#00BFA5"
 # CENTERED TITLE
 # ==========================
 
-col1, col2, col3 = st.columns([1, 2, 1])
-with col2:
-    st.title("⚖️ Vidhik AI")
-    st.markdown("### The Governance Gateway for the Government of Uttarakhand")
-    
+st.markdown(
+    """
+    <div style='text-align: center;'>
+        <h1>⚖️ Vidhik AI</h1>
+        <h3>The Governance Gateway for the Government of Uttarakhand</h3>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
 st.info("Upload your policy draft (or use the sample text) and click 'Run Audit' to instantly check for legal conflicts, PII risks, and policy bias.")
 
 # ==========================
@@ -187,78 +192,99 @@ def process_docx_file(uploaded_file):
 # MAIN TEXT AREA (ORIGINAL FROM FIRST CODE)
 # ==========================
 
+st.subheader("Policy Draft to Audit")
 policy_input = st.text_area(
     "Policy Draft to Audit:",
     value=placeholder_policy,
-    height=400
+    height=400,
+    label_visibility="collapsed"
 )
 
 # ==========================
-# UPLOAD BUTTON AND RUN BUTTON SECTION (SIDE BY SIDE)
+# UPLOAD BUTTON AND RUN BUTTON SECTION (IMPROVED ALIGNMENT)
 # ==========================
 
-col1, col2 = st.columns(2)
+st.markdown("### Actions")
+col1, col2, col3 = st.columns([1, 1, 1])
 
 with col1:
-    # Upload Policy Document as a button
+    st.markdown("#### 📁 Upload Document")
     uploaded_file = st.file_uploader(
-        "📁 Upload Policy Document",
+        "Choose a file",
         type=['txt', 'pdf', 'docx', 'doc'],
-        help="Upload your policy document"
+        help="Upload your policy document",
+        label_visibility="collapsed"
     )
+    if uploaded_file:
+        st.success(f"✅ {uploaded_file.name}")
 
 with col2:
-    # Run Audit Button
-    if st.button("🚀 Run Vidhik AI Audit", type="primary", use_container_width=True):
-        # Process uploaded file if any
-        input_text = ""
-        if uploaded_file:
-            try:
-                st.success(f"Uploaded: {uploaded_file.name}")
+    st.markdown("#### 🚀 Run Analysis")
+    run_audit = st.button(
+        "Run Vidhik AI Audit", 
+        type="primary", 
+        use_container_width=True,
+        help="Click to analyze the policy document"
+    )
 
-                if uploaded_file.type == "text/plain":
-                    input_text = str(uploaded_file.read(), "utf-8")
+with col3:
+    st.markdown("#### 🛠️ Tools")
+    if st.session_state.get("report"):
+        if st.button("🗑️ Clear Report", use_container_width=True, type="secondary"):
+            st.session_state.pop("report", None)
+            st.session_state.pop("report_text", None)
+            st.rerun()
 
-                elif uploaded_file.type == "application/pdf":
-                    import PyPDF2
-                    reader = PyPDF2.PdfReader(uploaded_file)
-                    input_text = "\n".join([page.extract_text() for page in reader.pages])
+# ==========================
+# PROCESS AUDIT WHEN RUN BUTTON IS CLICKED
+# ==========================
 
-                elif uploaded_file.type in ["application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                                            "application/msword"]:
-                    import docx
-                    doc = docx.Document(uploaded_file)
-                    input_text = "\n".join([p.text for p in doc.paragraphs])
+if run_audit:
+    # Process uploaded file if any
+    input_text = ""
+    if uploaded_file:
+        try:
+            if uploaded_file.type == "text/plain":
+                input_text = str(uploaded_file.read(), "utf-8")
+            elif uploaded_file.type == "application/pdf":
+                import PyPDF2
+                reader = PyPDF2.PdfReader(uploaded_file)
+                input_text = "\n".join([page.extract_text() for page in reader.pages])
+            elif uploaded_file.type in ["application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                        "application/msword"]:
+                import docx
+                doc = docx.Document(uploaded_file)
+                input_text = "\n".join([p.text for p in doc.paragraphs])
 
-                # Use uploaded file content
-                final_text = input_text if input_text else policy_input
-            except Exception as e:
-                st.error(f"File error: {e}")
-                final_text = policy_input
-        else:
-            # Use text area content
+            # Use uploaded file content
+            final_text = input_text if input_text else policy_input
+        except Exception as e:
+            st.error(f"File error: {e}")
             final_text = policy_input
+    else:
+        # Use text area content
+        final_text = policy_input
 
-        if not final_text.strip():
-            st.error("Enter policy text first.")
-            st.stop()
+    if not final_text.strip():
+        st.error("Please enter policy text first.")
+        st.stop()
 
-        with st.spinner("Analyzing..."):
+    with st.spinner("🔍 Analyzing policy document..."):
+        try:
+            # Try to import the real analyzer, fall back to mock
             try:
-                # Try to import the real analyzer, fall back to mock
-                try:
-                    from vidhik_engine import analyze_policy as real_analyze_policy
-                    final_report = real_analyze_policy(final_text)
-                except ImportError:
-                    st.warning("Using mock analysis - vidhik_engine not available")
-                    final_report = analyze_policy(final_text)
-                
-                st.session_state["report"] = final_report
-                st.session_state["report_text"] = final_text
-                st.success("Audit Complete!")
-            except Exception as e:
-                st.error(f"Error: {e}")
-                st.stop()
+                from vidhik_engine import analyze_policy as real_analyze_policy
+                final_report = real_analyze_policy(final_text)
+            except ImportError:
+                st.warning("Using mock analysis - vidhik_engine not available")
+                final_report = analyze_policy(final_text)
+            
+            st.session_state["report"] = final_report
+            st.session_state["report_text"] = final_text
+            st.success("✅ Audit Complete!")
+        except Exception as e:
+            st.error(f"Error during analysis: {e}")
+            st.stop()
 
 # ==========================
 # REPORT DISPLAY + PDF EXPORT
@@ -268,46 +294,83 @@ if "report" in st.session_state:
     report = st.session_state["report"]
 
     st.markdown("---")
-    st.header("Audit Report")
+    st.header("📊 Audit Report")
+    
+    # Overall Status with better styling
+    status = report.get("Overall Status", "Unknown")
+    status_col1, status_col2 = st.columns([1, 3])
+    
+    with status_col1:
+        st.subheader("Overall Status")
+    with status_col2:
+        if "FAIL" in status.upper():
+            st.error(f"**{status}**")
+        elif "PASS" in status.upper():
+            st.success(f"**{status}**")
+        else:
+            st.warning(f"**{status}**")
 
-    st.subheader("📌 Overall Status")
-    st.write(report.get("Overall Status", "Unknown"))
-
+    # Executive Summary
     st.subheader("Executive Summary")
     st.write(report.get("Executive Summary", ""))
 
-    # ---- Tabs ----
-    tab1, tab2, tab3 = st.tabs(["⚖ Legal Conflicts", "🌍 Policy Bias", "🔐 PII Risk"])
+    # ---- Tabs for Detailed Reports ----
+    tab1, tab2, tab3 = st.tabs(["⚖️ Legal Conflicts", "🌍 Policy Bias", "🔐 PII Risk"])
 
     with tab1:
-        st.write(report.get("Raw Reports", {}).get("Conflict Report", {}))
+        conflict_data = report.get("Raw Reports", {}).get("Conflict Report", {})
+        if conflict_data:
+            st.json(conflict_data)
+        else:
+            st.info("No legal conflict data available")
 
     with tab2:
-        st.write(report.get("Raw Reports", {}).get("Bias Report", {}))
+        bias_data = report.get("Raw Reports", {}).get("Bias Report", {})
+        if bias_data:
+            st.json(bias_data)
+        else:
+            st.info("No bias analysis data available")
 
     with tab3:
-        st.write(report.get("Raw Reports", {}).get("PII Report", {}))
+        pii_data = report.get("Raw Reports", {}).get("PII Report", {})
+        if pii_data:
+            st.json(pii_data)
+        else:
+            st.info("No PII analysis data available")
 
-    # ---- PDF DOWNLOAD BUTTON ----
+    # ---- EXPORT SECTION ----
+    st.markdown("---")
+    st.header("📤 Export Results")
+    
+    export_col1, export_col2 = st.columns(2)
+    
+    with export_col1:
+        st.subheader("Download PDF Report")
+        pdf_bytes = create_pdf(report)
+        if pdf_bytes:
+            st.download_button(
+                label="📥 Download PDF Report",
+                data=pdf_bytes,
+                file_name="VidhikAI_Audit_Report.pdf",
+                mime="application/pdf",
+                use_container_width=True
+            )
+        else:
+            st.warning("PDF generation unavailable")
 
-    pdf_bytes = create_pdf(report)
-
-    st.markdown("### 📄 Download PDF Report")
-    st.download_button(
-        label="Download PDF",
-        data=pdf_bytes,
-        file_name="VidhikAI_Audit_Report.pdf",
-        mime="application/pdf"
-    )
-
-    # ---- CLEAR REPORT BUTTON ----
-    if st.button("🗑️ Clear Current Report", type="secondary"):
-        st.session_state.pop("report", None)
-        st.session_state.pop("report_text", None)
-        st.rerun()
+    with export_col2:
+        st.subheader("Download Raw Data")
+        json_str = json.dumps(report, indent=2)
+        st.download_button(
+            label="📥 Download JSON",
+            data=json_str,
+            file_name="VidhikAI_Audit_Data.json",
+            mime="application/json",
+            use_container_width=True
+        )
 
     # ---- RAW JSON VIEW ----
-    with st.expander("View Raw JSON"):
+    with st.expander("🔍 View Raw JSON Data"):
         st.json(report)
 
 # ==========================
