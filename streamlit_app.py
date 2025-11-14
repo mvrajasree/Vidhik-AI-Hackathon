@@ -14,7 +14,7 @@ st.set_page_config(
 )
 
 # ==========================
-# PROFESSIONAL STYLING
+# DARK THEME COMPATIBLE STYLING
 # ==========================
 
 st.markdown("""
@@ -24,7 +24,7 @@ st.markdown("""
         margin-top: -2rem;
         margin-bottom: 1rem;
         padding: 1.5rem 0;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
         border-radius: 10px;
         color: white;
     }
@@ -40,18 +40,35 @@ st.markdown("""
         opacity: 0.9;
     }
     .section-header {
-        border-bottom: 2px solid #667eea;
+        border-bottom: 2px solid #1e3c72;
         padding-bottom: 0.5rem;
         margin-bottom: 1rem;
-        color: #2d3748;
+        color: #1e3c72 !important;
         font-weight: 600;
+        font-size: 1.4rem;
+    }
+    .dark-theme-header {
+        border-bottom: 2px solid #4a90e2;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+        color: #4a90e2 !important;
+        font-weight: 600;
+        font-size: 1.4rem;
     }
     .action-card {
         background-color: #f8fafc;
         padding: 1.5rem;
         border-radius: 10px;
-        border-left: 4px solid #667eea;
+        border-left: 4px solid #1e3c72;
         margin-bottom: 1rem;
+    }
+    .dark-action-card {
+        background-color: #2d3748;
+        padding: 1.5rem;
+        border-radius: 10px;
+        border-left: 4px solid #4a90e2;
+        margin-bottom: 1rem;
+        color: white;
     }
     .stButton button {
         border-radius: 8px;
@@ -68,6 +85,15 @@ st.markdown("""
         border-radius: 8px;
         padding: 0.75rem;
         margin: 0.5rem 0;
+        color: #22543d;
+    }
+    .dark-success-msg {
+        background-color: #22543d;
+        border: 1px solid #48bb78;
+        border-radius: 8px;
+        padding: 0.75rem;
+        margin: 0.5rem 0;
+        color: white;
     }
     .report-section {
         background-color: white;
@@ -75,6 +101,38 @@ st.markdown("""
         border-radius: 10px;
         box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         margin: 1rem 0;
+        border: 1px solid #e2e8f0;
+    }
+    .dark-report-section {
+        background-color: #2d3748;
+        padding: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        margin: 1rem 0;
+        border: 1px solid #4a5568;
+        color: white;
+    }
+    .subsection-header {
+        color: #2d3748 !important;
+        font-weight: 600;
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+    }
+    .dark-subsection-header {
+        color: #e2e8f0 !important;
+        font-weight: 600;
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+    }
+    .control-header {
+        color: #2d3748 !important;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    .dark-control-header {
+        color: #e2e8f0 !important;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -186,7 +244,7 @@ def analyze_policy(policy_text):
 st.sidebar.markdown(
     """
     <div style='text-align: center; margin-bottom: 2rem;'>
-        <h3>🔍 Navigation</h3>
+        <h3 style='color: #1e3c72;'>🔍 Navigation</h3>
     </div>
     """,
     unsafe_allow_html=True
@@ -238,7 +296,7 @@ st.markdown('<div class="section-header">Policy Document Analysis</div>', unsafe
 col1, col2 = st.columns([3, 1])
 
 with col1:
-    st.markdown("#### Policy Draft to Audit")
+    st.markdown("#### 📝 Policy Draft to Audit")
     policy_input = st.text_area(
         "Policy Draft to Audit:",
         value=placeholder_policy,
@@ -247,11 +305,11 @@ with col1:
     )
 
 with col2:
-    st.markdown("#### Document Controls")
+    st.markdown("#### 📎 Document Controls")
     with st.container():
         st.markdown('<div class="action-card">', unsafe_allow_html=True)
         uploaded_file = st.file_uploader(
-            "📎 Upload Document",
+            "Upload Document",
             type=['txt', 'pdf', 'docx', 'doc'],
             help="Supported formats: TXT, PDF, DOCX, DOC"
         )
@@ -263,19 +321,19 @@ with col2:
 # ACTION CONTROLS
 # ==========================
 
-st.markdown("### Analysis Controls")
+st.markdown("### ⚙️ Analysis Controls")
 
 action_col1, action_col2, action_col3 = st.columns([1, 1, 1])
 
 with action_col1:
-    st.markdown("#### Data Input")
+    st.markdown("#### 📥 Data Input")
     use_sample = st.checkbox("Use sample policy", value=True)
     if st.button("🔄 Reset Text", use_container_width=True):
         st.session_state.clear()
         st.rerun()
 
 with action_col2:
-    st.markdown("#### Audit Execution")
+    st.markdown("#### 🔍 Audit Execution")
     run_audit = st.button(
         "🚀 Run Comprehensive Audit", 
         type="primary", 
@@ -284,7 +342,7 @@ with action_col2:
     )
 
 with action_col3:
-    st.markdown("#### Results Management")
+    st.markdown("#### 📊 Results Management")
     if st.session_state.get("report"):
         if st.button("🗑️ Clear Results", use_container_width=True, type="secondary"):
             st.session_state.pop("report", None)
@@ -346,7 +404,7 @@ if "report" in st.session_state:
     report = st.session_state["report"]
     
     st.markdown("---")
-    st.markdown('<div class="section-header">Audit Results</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header">📊 Audit Results</div>', unsafe_allow_html=True)
     
     # Overall Status
     st.markdown('<div class="report-section">', unsafe_allow_html=True)
@@ -354,7 +412,7 @@ if "report" in st.session_state:
     
     status_col1, status_col2 = st.columns([1, 4])
     with status_col1:
-        st.markdown("##### Compliance Status")
+        st.markdown("##### 🎯 Compliance Status")
     with status_col2:
         if "FAIL" in status.upper():
             st.error(f"**{status}**")
@@ -366,16 +424,17 @@ if "report" in st.session_state:
 
     # Executive Summary
     st.markdown('<div class="report-section">', unsafe_allow_html=True)
-    st.markdown("##### Executive Summary")
+    st.markdown("##### 📋 Executive Summary")
     st.write(report.get("Executive Summary", "No summary available."))
     st.markdown('</div>', unsafe_allow_html=True)
 
     # Detailed Analysis
-    st.markdown("##### Detailed Analysis")
+    st.markdown("##### 🔍 Detailed Analysis")
     tab1, tab2, tab3 = st.tabs(["⚖️ Legal Compliance", "🌍 Bias Assessment", "🔐 Data Privacy"])
 
     with tab1:
         st.markdown('<div class="report-section">', unsafe_allow_html=True)
+        st.markdown("###### Legal Compliance Report")
         conflict_data = report.get("Raw Reports", {}).get("Conflict Report", {})
         if conflict_data:
             st.json(conflict_data)
@@ -385,6 +444,7 @@ if "report" in st.session_state:
 
     with tab2:
         st.markdown('<div class="report-section">', unsafe_allow_html=True)
+        st.markdown("###### Bias Assessment Report")
         bias_data = report.get("Raw Reports", {}).get("Bias Report", {})
         if bias_data:
             st.json(bias_data)
@@ -394,6 +454,7 @@ if "report" in st.session_state:
 
     with tab3:
         st.markdown('<div class="report-section">', unsafe_allow_html=True)
+        st.markdown("###### Data Privacy Report")
         pii_data = report.get("Raw Reports", {}).get("PII Report", {})
         if pii_data:
             st.json(pii_data)
@@ -403,7 +464,7 @@ if "report" in st.session_state:
 
     # Export Section
     st.markdown("---")
-    st.markdown('<div class="section-header">Report Export</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header">📤 Report Export</div>', unsafe_allow_html=True)
     
     export_col1, export_col2 = st.columns(2)
     
@@ -447,7 +508,7 @@ if "report" in st.session_state:
 st.markdown("---")
 st.markdown(
     """
-    <div style='text-align: center; color: #666; font-size: 0.9rem; padding: 1rem;'>
+    <div style='text-align: center; color: #1e3c72; font-size: 0.9rem; padding: 1rem; font-weight: 500;'>
         <strong>Vidhik AI</strong> • Government of Uttarakhand • DPDP Act Compliance • IT Act 2000 • 2025
     </div>
     """,
