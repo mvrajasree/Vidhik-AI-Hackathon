@@ -89,25 +89,14 @@ st.info("Upload your policy draft (or use the sample text) and click 'Run Audit'
 
 st.sidebar.title("Navigation")
 
-# Option 1: Vidhik AI Architecture
-st.sidebar.subheader("1. Vidhik AI Architecture")
-st.sidebar.markdown("**Phase 1: The Security Gatekeeper**")
-st.sidebar.markdown("✅ PII Redaction & Data Privacy Check (DPDP Act)")
-st.sidebar.markdown("**Phase 2: The Legal Analyzer**")
-st.sidebar.markdown("✅ Semantic Conflict Detection (FAISS DB)")
-st.sidebar.markdown("**Phase 3: The Fairness Auditor**")
-st.sidebar.markdown("✅ Linguistic Bias & Inclusivity Check")
-
-st.sidebar.markdown("---")
-
-# Upload option on the left sidebar
-st.sidebar.subheader("📁 Upload Policy Document")
-
-uploaded_file = st.sidebar.file_uploader(
-    "Choose a file",
-    type=['txt', 'pdf', 'docx', 'doc'],
-    help="Upload your policy document"
-)
+# Collapsible Vidhik AI Architecture section
+with st.sidebar.expander("🔧 Vidhik AI Architecture", expanded=False):
+    st.markdown("**Phase 1: The Security Gatekeeper**")
+    st.markdown("✅ PII Redaction & Data Privacy Check (DPDP Act)")
+    st.markdown("**Phase 2: The Legal Analyzer**")
+    st.markdown("✅ Semantic Conflict Detection (FAISS DB)")
+    st.markdown("**Phase 3: The Fairness Auditor**")
+    st.markdown("✅ Linguistic Bias & Inclusivity Check")
 
 # ==========================
 # PLACEHOLDER POLICY
@@ -127,13 +116,26 @@ Access to DSDP services is restricted solely to citizens who can reliably interf
 """
 
 # ==========================
+# FILE UPLOAD SECTION (MOVED TO MAIN AREA)
+# ==========================
+
+st.markdown("---")
+st.subheader("📁 Upload Policy Document")
+
+uploaded_file = st.file_uploader(
+    "Choose a file",
+    type=['txt', 'pdf', 'docx', 'doc'],
+    help="Upload your policy document"
+)
+
+# ==========================
 # FILE PROCESSING
 # ==========================
 
 input_text = ""
 if uploaded_file:
     try:
-        st.sidebar.success(f"Uploaded: {uploaded_file.name}")
+        st.success(f"Uploaded: {uploaded_file.name}")
 
         if uploaded_file.type == "text/plain":
             input_text = str(uploaded_file.read(), "utf-8")
@@ -150,7 +152,7 @@ if uploaded_file:
             input_text = "\n".join([p.text for p in doc.paragraphs])
 
     except Exception as e:
-        st.sidebar.error(f"File error: {e}")
+        st.error(f"File error: {e}")
         input_text = placeholder_policy
 
 else:
@@ -160,29 +162,34 @@ else:
 # MAIN TEXT AREA
 # ==========================
 
+st.subheader("Policy Draft to Audit:")
 policy_input = st.text_area(
-    "Policy Draft to Audit:",
+    "Policy Text",
     value=input_text,
-    height=400
+    height=400,
+    label_visibility="collapsed"
 )
 
 # ==========================
-# RUN BUTTON
+# RUN BUTTON SECTION
 # ==========================
 
-if st.button("🚀 Run Vidhik AI Audit", type="primary"):
-    if not policy_input.strip():
-        st.error("Enter policy text first.")
-        st.stop()
+col1, col2 = st.columns([1, 3])
 
-    with st.spinner("Analyzing..."):
-        try:
-            final_report = analyze_policy(policy_input)
-            st.session_state["report"] = final_report
-            st.success("Audit Complete!")
-        except Exception as e:
-            st.error(f"Error: {e}")
+with col1:
+    if st.button("🚀 Run Vidhik AI Audit", type="primary", use_container_width=True):
+        if not policy_input.strip():
+            st.error("Enter policy text first.")
             st.stop()
+
+        with st.spinner("Analyzing..."):
+            try:
+                final_report = analyze_policy(policy_input)
+                st.session_state["report"] = final_report
+                st.success("Audit Complete!")
+            except Exception as e:
+                st.error(f"Error: {e}")
+                st.stop()
 
 # ==========================
 # REPORT DISPLAY + PDF EXPORT
