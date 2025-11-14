@@ -17,12 +17,26 @@ FAIL_COLOR = "#FF4B4B"
 PASS_COLOR = "#00BFA5"
 
 # ==========================
-# CENTERED TITLE
+# CENTERED TITLE WITH REDUCED PADDING
 # ==========================
 
 st.markdown(
     """
-    <div style='text-align: center;'>
+    <style>
+    .centered-title {
+        text-align: center;
+        margin-top: -2rem;
+        margin-bottom: 1rem;
+    }
+    .centered-title h1 {
+        margin-bottom: 0.5rem;
+    }
+    .centered-title h3 {
+        margin-top: 0;
+    }
+    </style>
+    
+    <div class='centered-title'>
         <h1>⚖️ Vidhik AI</h1>
         <h3>The Governance Gateway for the Government of Uttarakhand</h3>
     </div>
