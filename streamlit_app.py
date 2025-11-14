@@ -273,21 +273,20 @@ with col2:
         st.success(f"✅ {uploaded_file.name}")
 
 # ==========================
-# COMPACT ACTION CONTROLS
+# ALIGNED ACTION CONTROLS
 # ==========================
 
 st.markdown("---")
-st.markdown("### Analysis Controls")
 
-action_col1, action_col2, action_col3 = st.columns(3)
+# Create a container for aligned buttons
+button_col1, button_col2, button_col3 = st.columns([1, 2, 1])
 
-with action_col1:
+with button_col1:
     use_sample = st.checkbox("Use sample policy", value=True)
-    if st.button("🔄 Reset Text", use_container_width=True):
-        st.session_state.clear()
-        st.rerun()
+    reset_clicked = st.button("🔄 Reset Text", use_container_width=True)
 
-with action_col2:
+with button_col2:
+    # Center the main audit button
     run_audit = st.button(
         "🚀 Run Comprehensive Audit", 
         type="primary", 
@@ -295,12 +294,23 @@ with action_col2:
         help="Initiate full policy analysis"
     )
 
-with action_col3:
+with button_col3:
+    # Right-align the clear button
     if st.session_state.get("report"):
-        if st.button("🗑️ Clear Results", use_container_width=True, type="secondary"):
-            st.session_state.pop("report", None)
-            st.session_state.pop("report_text", None)
-            st.rerun()
+        clear_clicked = st.button("🗑️ Clear Results", use_container_width=True, type="secondary")
+    else:
+        # Placeholder to maintain alignment
+        st.empty()
+
+# Handle button actions
+if reset_clicked:
+    st.session_state.clear()
+    st.rerun()
+
+if clear_clicked:
+    st.session_state.pop("report", None)
+    st.session_state.pop("report_text", None)
+    st.rerun()
 
 # ==========================
 # AUDIT PROCESSING
