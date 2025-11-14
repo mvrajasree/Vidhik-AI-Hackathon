@@ -116,123 +116,184 @@ Access to DSDP services is restricted solely to citizens who can reliably interf
 """
 
 # ==========================
-# FILE UPLOAD SECTION (MOVED TO MAIN AREA)
-# ==========================
-
-st.markdown("---")
-st.subheader("📁 Upload Policy Document")
-
-uploaded_file = st.file_uploader(
-    "Choose a file",
-    type=['txt', 'pdf', 'docx', 'doc'],
-    help="Upload your policy document"
-)
-
-# ==========================
-# FILE PROCESSING
-# ==========================
-
-input_text = ""
-if uploaded_file:
-    try:
-        st.success(f"Uploaded: {uploaded_file.name}")
-
-        if uploaded_file.type == "text/plain":
-            input_text = str(uploaded_file.read(), "utf-8")
-
-        elif uploaded_file.type == "application/pdf":
-            import PyPDF2
-            reader = PyPDF2.PdfReader(uploaded_file)
-            input_text = "\n".join([page.extract_text() for page in reader.pages])
-
-        elif uploaded_file.type in ["application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                                    "application/msword"]:
-            import docx
-            doc = docx.Document(uploaded_file)
-            input_text = "\n".join([p.text for p in doc.paragraphs])
-
-    except Exception as e:
-        st.error(f"File error: {e}")
-        input_text = placeholder_policy
-
-else:
-    input_text = placeholder_policy
-
-# ==========================
 # MAIN TEXT AREA
 # ==========================
 
 st.subheader("Policy Draft to Audit:")
 policy_input = st.text_area(
     "Policy Text",
-    value=input_text,
+    value=placeholder_policy,
     height=400,
     label_visibility="collapsed"
 )
 
 # ==========================
+# FILE UPLOAD SECTION (BELOW TEXT AREA)
+# ==========================
+
+st.markdown("---")
+st.subheader("📁 Upload Policy Document")
+
+uploaded_file = st.file_uploader(
+    "Choose a file to replace the current policy text",
+    type=['txt', 'pdf', 'docx', 'doc'],
+    help="Upload your policy document to replace the text above"
+)
+
+# ==========================
+# FILE PROCESSING
+# ==========================
+
+if uploaded_file:
+    try:
+        st.success(f"Uploaded: {uploaded_file.name}")
+
+        if uploaded_file.type == "text/plain":
+            input_text = str(uploaded_file.read(), "utf-8")
+            # Update the text area with uploaded content
+            st.session_state.uploaded_text = input_text
+
+        elif uploaded_file.type == "application/pdf":
+            import PyPDF2
+            reader = PyPDF2.PdfReader(uploaded_file)
+            input_text = "\n".join([page.extract_text() for page in reader.pages])
+            st.session_state.uploaded_text = input_text
+
+        elif uploaded_file.type in ["application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                    "application/msword"]:
+            import docx
+            doc = docx.Document(uploaded_file)
+            input_text = "\n".join([p.text for p in doc.paragraphs])
+            st.session_state.uploaded_text = input_text
+
+        # Update the text area
+        if 'uploaded_text' in st.session_state:
+            policy_input = st.session_state.uploaded_text
+            st.rerun()
+
+    except Exception as e:
+        st.error(f"File error: {e}")
+
+# ==========================
 # RUN BUTTON SECTION
 # ==========================
 
-col1, col2 = st.columns([1, 3])
+st.markdown("---")
+col1, col2, col3 = st.columns([1, 2, 1])
 
-with col1:
+with col2:
     if st.button("🚀 Run Vidhik AI Audit", type="primary", use_container_width=True):
-        if not policy_input.strip():
+        # Use uploaded text if available, otherwise use text area content
+        if 'uploaded_text' in st.session_state:
+            final_text = st.session_state.uploaded_text
+        else:
+            final_text = policy_input
+            
+        if not final_text.strip():
             st.error("Enter policy text first.")
             st.stop()
 
-        with st.spinner("Analyzing..."):
+        with st.spinner("Analyzing policy document..."):
             try:
-                final_report = analyze_policy(policy_input)
+                final_report = analyze_policy(final_text)
                 st.session_state["report"] = final_report
+                st.session_state["report_generated"] = True
                 st.success("Audit Complete!")
             except Exception as e:
-                st.error(f"Error: {e}")
+                st.error(f"Error during analysis: {e}")
                 st.stop()
 
 # ==========================
 # REPORT DISPLAY + PDF EXPORT
 # ==========================
 
-if "report" in st.session_state:
+if "report" in st.session_state and st.session_state.get("report_generated", False):
     report = st.session_state["report"]
 
     st.markdown("---")
-    st.header("Audit Report")
-
-    st.subheader("📌 Overall Status")
-    st.write(report.get("Overall Status", "Unknown"))
+    st.header("📊 Audit Report")
+    
+    # Overall Status with color coding
+    status = report.get("Overall Status", "Unknown")
+    if "FAIL" in status.upper():
+        st.error(f"### 📌 Overall Status: {status}")
+    elif "PASS" in status.upper():
+        st.success(f"### 📌 Overall Status: {status}")
+    else:
+        st.warning(f"### 📌 Overall Status: {status}")
 
     st.subheader("Executive Summary")
     st.write(report.get("Executive Summary", ""))
 
-    # ---- Tabs ----
-    tab1, tab2, tab3 = st.tabs(["⚖ Legal Conflicts", "🌍 Policy Bias", "🔐 PII Risk"])
+    # ---- Tabs for Detailed Reports ----
+    tab1, tab2, tab3 = st.tabs(["⚖️ Legal Conflicts", "🌍 Policy Bias", "🔐 PII Risk"])
 
     with tab1:
-        st.write(report.get("Raw Reports", {}).get("Conflict Report", {}))
+        conflict_report = report.get("Raw Reports", {}).get("Conflict Report", {})
+        if conflict_report:
+            st.json(conflict_report)
+        else:
+            st.info("No legal conflicts detected")
 
     with tab2:
-        st.write(report.get("Raw Reports", {}).get("Bias Report", {}))
+        bias_report = report.get("Raw Reports", {}).get("Bias Report", {})
+        if bias_report:
+            st.json(bias_report)
+        else:
+            st.info("No bias issues detected")
 
     with tab3:
-        st.write(report.get("Raw Reports", {}).get("PII Report", {}))
+        pii_report = report.get("Raw Reports", {}).get("PII Report", {})
+        if pii_report:
+            st.json(pii_report)
+        else:
+            st.info("No PII risks detected")
 
-    # ---- PDF DOWNLOAD BUTTON ----
-
-    pdf_bytes = create_pdf(report)
-
-    st.markdown("### 📄 Download PDF Report")
-    st.download_button(
-        label="Download PDF",
-        data=pdf_bytes,
-        file_name="VidhikAI_Audit_Report.pdf",
-        mime="application/pdf"
-    )
+    # ---- PDF DOWNLOAD SECTION ----
+    st.markdown("---")
+    st.header("📄 Export Report")
+    
+    col1, col2 = st.columns([1, 1])
+    
+    with col1:
+        st.subheader("Download PDF Report")
+        st.markdown("Get a formatted PDF version of the complete audit report for official records and sharing.")
+        
+        # Generate PDF
+        pdf_bytes = create_pdf(report)
+        
+        st.download_button(
+            label="📥 Download PDF Report",
+            data=pdf_bytes,
+            file_name="VidhikAI_Audit_Report.pdf",
+            mime="application/pdf",
+            use_container_width=True,
+            help="Download a PDF version of the complete audit report"
+        )
+    
+    with col2:
+        st.subheader("Additional Options")
+        
+        # Download JSON
+        json_str = json.dumps(report, indent=2)
+        st.download_button(
+            label="📥 Download JSON Data",
+            data=json_str,
+            file_name="VidhikAI_Audit_Data.json",
+            mime="application/json",
+            use_container_width=True,
+            help="Download raw JSON data for further analysis"
+        )
+        
+        # Clear report button
+        if st.button("🗑️ Clear Report", use_container_width=True):
+            st.session_state.pop("report", None)
+            st.session_state.pop("report_generated", None)
+            st.session_state.pop("uploaded_text", None)
+            st.rerun()
 
     # ---- RAW JSON VIEW ----
-    with st.expander("View Raw JSON"):
+    with st.expander("🔍 View Raw JSON Data"):
         st.json(report)
 
 # ==========================
