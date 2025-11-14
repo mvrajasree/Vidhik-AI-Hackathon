@@ -87,7 +87,10 @@ st.info("Upload your policy draft (or use the sample text) and click 'Run Audit'
 # SIDEBAR
 # ==========================
 
-st.sidebar.title("Vidhik AI Architecture")
+st.sidebar.title("Navigation")
+
+# Option 1: Vidhik AI Architecture
+st.sidebar.subheader("1. Vidhik AI Architecture")
 st.sidebar.markdown("**Phase 1: The Security Gatekeeper**")
 st.sidebar.markdown("✅ PII Redaction & Data Privacy Check (DPDP Act)")
 st.sidebar.markdown("**Phase 2: The Legal Analyzer**")
@@ -96,6 +99,8 @@ st.sidebar.markdown("**Phase 3: The Fairness Auditor**")
 st.sidebar.markdown("✅ Linguistic Bias & Inclusivity Check")
 
 st.sidebar.markdown("---")
+
+# Upload option on the left sidebar
 st.sidebar.subheader("📁 Upload Policy Document")
 
 uploaded_file = st.sidebar.file_uploader(
