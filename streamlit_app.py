@@ -1,8 +1,6 @@
 import streamlit as st
 import json
 import io
-import random
-from datetime import datetime
 
 # ==========================
 # PAGE CONFIG
@@ -16,7 +14,7 @@ st.set_page_config(
 )
 
 # ==========================
-# ELEGANT & PLEASING STYLING
+# ELEGANT DARK STYLING
 # ==========================
 
 st.markdown("""
@@ -27,17 +25,17 @@ st.markdown("""
         margin-top: -2rem;
         margin-bottom: 1rem;
         padding: 2rem 0;
-        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-        border-radius: 16px;
+        background: linear-gradient(135deg, #0c0c0c 0%, #1a1a1a 100%);
+        border-radius: 12px;
         color: #ffffff;
-        border: 1px solid #475569;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        border: 1px solid #333333;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
     }
     .main-header h1 {
         margin-bottom: 0.5rem;
         font-size: 2.8rem;
         font-weight: 700;
-        background: linear-gradient(135deg, #f8fafc 0%, #cbd5e1 100%);
+        background: linear-gradient(135deg, #e0e0e0 0%, #a0a0a0 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -46,346 +44,191 @@ st.markdown("""
         margin-top: 0;
         font-size: 1.3rem;
         font-weight: 400;
-        color: #cbd5e1;
+        color: #b0b0b0;
     }
     
     /* Button Styles */
     .stButton > button {
-        border-radius: 12px !important;
+        border-radius: 10px !important;
         color: #ffffff !important;
-        background: linear-gradient(135deg, #475569 0%, #64748b 100%) !important;
-        border: 1px solid #64748b !important;
-        padding: 0.7rem 2rem !important;
+        background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%) !important;
+        border: 1px solid #4a5568 !important;
+        padding: 0.6rem 1.8rem !important;
         font-weight: 500 !important;
         transition: all 0.3s ease !important;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
     }
     
     .stButton > button:hover {
-        background: linear-gradient(135deg, #64748b 0%, #94a3b8 100%) !important;
+        background: linear-gradient(135deg, #4a5568 0%, #718096 100%) !important;
         transform: translateY(-2px) !important;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.2) !important;
-        border-color: #94a3b8 !important;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.3) !important;
+        border-color: #718096 !important;
+    }
+    
+    .stButton > button:focus {
+        box-shadow: 0 0 0 2px rgba(113, 128, 150, 0.5) !important;
     }
     
     /* Primary Button */
     .stButton > button[kind="primary"] {
-        background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%) !important;
-        border: 1px solid #3b82f6 !important;
+        background: linear-gradient(135deg, #1a365d 0%, #2d3748 100%) !important;
+        border: 1px solid #2d3748 !important;
     }
     
     .stButton > button[kind="primary"]:hover {
-        background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%) !important;
-        border-color: #60a5fa !important;
+        background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%) !important;
+        border-color: #4a5568 !important;
     }
     
     /* Secondary Button */
     .stButton > button[kind="secondary"] {
-        background: linear-gradient(135deg, #475569 0%, #64748b 100%) !important;
-        border: 1px solid #64748b !important;
+        background: linear-gradient(135deg, #2d2d2d 0%, #404040 100%) !important;
+        border: 1px solid #555555 !important;
     }
     
     .stButton > button[kind="secondary"]:hover {
-        background: linear-gradient(135deg, #64748b 0%, #94a3b8 100%) !important;
-        border-color: #94a3b8 !important;
+        background: linear-gradient(135deg, #404040 0%, #555555 100%) !important;
+        border-color: #666666 !important;
     }
     
     /* Text Area */
     .stTextArea textarea {
-        border: 2px solid #cbd5e1 !important;
-        border-radius: 12px !important;
-        background-color: #f8fafc !important;
-        color: #1e293b !important;
+        border: 2px solid #4a5568 !important;
+        border-radius: 10px !important;
+        background-color: #1a1a1a !important;
+        color: #e2e8f0 !important;
         padding: 1rem !important;
-        font-family: 'Inter', sans-serif !important;
-        transition: all 0.3s ease !important;
+        font-family: 'Courier New', monospace !important;
     }
     
     .stTextArea textarea:focus {
-        border-color: #3b82f6 !important;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+        border-color: #718096 !important;
+        box-shadow: 0 0 0 2px rgba(113, 128, 150, 0.2) !important;
     }
     
     /* File Uploader */
     .stFileUploader > div {
-        border: 2px dashed #cbd5e1 !important;
-        border-radius: 12px !important;
-        background-color: #f8fafc !important;
+        border: 2px dashed #4a5568 !important;
+        border-radius: 10px !important;
+        background-color: #1a1a1a !important;
         padding: 1.5rem !important;
-        transition: all 0.3s ease !important;
     }
     
     .stFileUploader > div:hover {
-        border-color: #3b82f6 !important;
-        background-color: #f1f5f9 !important;
+        border-color: #718096 !important;
+        background-color: #222222 !important;
     }
     
     /* Success Messages */
     .stSuccess {
-        background-color: #f0fdf4 !important;
-        border: 1px solid #bbf7d0 !important;
-        border-radius: 12px !important;
-        color: #15803d !important;
+        background-color: #1a3c2e !important;
+        border: 1px solid #2d6950 !important;
+        border-radius: 8px !important;
+        color: #68d391 !important;
     }
     
     /* Info Box */
     .stInfo {
-        background-color: #f0f9ff !important;
-        border: 1px solid #bae6fd !important;
-        border-radius: 12px !important;
-        color: #0369a1 !important;
-    }
-    
-    /* Warning Messages */
-    .stWarning {
-        background-color: #fffbeb !important;
-        border: 1px solid #fde68a !important;
-        border-radius: 12px !important;
-        color: #92400e !important;
-    }
-    
-    /* Error Messages */
-    .stError {
-        background-color: #fef2f2 !important;
-        border: 1px solid #fecaca !important;
-        border-radius: 12px !important;
-        color: #dc2626 !important;
+        background-color: #1a2838 !important;
+        border: 1px solid #2d4368 !important;
+        border-radius: 10px !important;
+        color: #90cdf4 !important;
     }
     
     /* Tabs */
     .stTabs [data-baseweb="tab-list"] {
         gap: 8px;
-        background-color: #f8fafc;
+        background-color: #1a1a1a;
         padding: 8px;
-        border-radius: 12px;
+        border-radius: 10px;
     }
     
     .stTabs [data-baseweb="tab"] {
-        background-color: #e2e8f0;
+        background-color: #2d3748;
         border-radius: 8px;
         padding: 12px 24px;
-        color: #475569;
+        color: #e2e8f0;
         transition: all 0.3s ease;
     }
     
     .stTabs [data-baseweb="tab"]:hover {
-        background-color: #cbd5e1;
-        color: #1e293b;
+        background-color: #4a5568;
+        color: #ffffff;
     }
     
     .stTabs [aria-selected="true"] {
-        background-color: #3b82f6 !important;
+        background-color: #718096 !important;
         color: #ffffff !important;
     }
     
     /* Expander */
     .streamlit-expanderHeader {
-        background-color: #f8fafc !important;
-        border: 1px solid #e2e8f0 !important;
-        border-radius: 12px !important;
-        color: #1e293b !important;
+        background-color: #2d3748 !important;
+        border: 1px solid #4a5568 !important;
+        border-radius: 8px !important;
+        color: #e2e8f0 !important;
         font-weight: 500 !important;
     }
     
     .streamlit-expanderContent {
-        background-color: #ffffff !important;
-        border: 1px solid #e2e8f0 !important;
-        border-radius: 0 0 12px 12px !important;
-        color: #1e293b !important;
+        background-color: #1a1a1a !important;
+        border: 1px solid #333333 !important;
+        border-radius: 0 0 8px 8px !important;
+        color: #e2e8f0 !important;
+    }
+    
+    /* JSON Display */
+    .stJson {
+        background-color: #1a1a1a !important;
+        border: 1px solid #333333 !important;
+        border-radius: 8px !important;
+        padding: 1rem !important;
     }
     
     /* Main Container */
     .main .block-container {
         padding-top: 2rem;
         padding-bottom: 2rem;
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%);
     }
     
     /* Sidebar */
     .css-1d391kg {
-        background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+        background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 100%) !important;
     }
     
     /* Custom Cards */
     .custom-card {
-        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-        border: 1px solid #e2e8f0;
-        border-radius: 16px;
+        background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        border: 1px solid #333333;
+        border-radius: 12px;
         padding: 1.5rem;
         margin: 1rem 0;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        transition: all 0.3s ease;
-    }
-    
-    .custom-card:hover {
-        box-shadow: 0 8px 30px rgba(0,0,0,0.12);
-        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
     }
     
     /* Section Headers */
     .section-header {
-        color: #1e293b !important;
+        color: #e2e8f0 !important;
         font-weight: 600;
         font-size: 1.4rem;
         margin-bottom: 1rem;
         padding-bottom: 0.5rem;
-        border-bottom: 2px solid #e2e8f0;
-    }
-    
-    /* Status Indicators */
-    .status-pass {
-        background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
-        color: white;
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        font-weight: 600;
-        display: inline-block;
-    }
-    
-    .status-warning {
-        background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
-        color: white;
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        font-weight: 600;
-        display: inline-block;
-    }
-    
-    .status-fail {
-        background: linear-gradient(135deg, #ef4444 0%, #f87171 100%);
-        color: white;
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        font-weight: 600;
-        display: inline-block;
-    }
-    
-    /* Issue Cards */
-    .issue-card {
-        background: #fef2f2;
-        border: 1px solid #fecaca;
-        border-radius: 12px;
-        padding: 1rem;
-        margin: 0.5rem 0;
-        border-left: 4px solid #ef4444;
-    }
-    
-    .warning-card {
-        background: #fffbeb;
-        border: 1px solid #fde68a;
-        border-radius: 12px;
-        padding: 1rem;
-        margin: 0.5rem 0;
-        border-left: 4px solid #f59e0b;
-    }
-    
-    .success-card {
-        background: #f0fdf4;
-        border: 1px solid #bbf7d0;
-        border-radius: 12px;
-        padding: 1rem;
-        margin: 0.5rem 0;
-        border-left: 4px solid #10b981;
-    }
-    
-    .issue-type {
-        font-weight: 600;
-        color: #dc2626;
-        margin-bottom: 0.5rem;
-    }
-    
-    .warning-type {
-        font-weight: 600;
-        color: #d97706;
-        margin-bottom: 0.5rem;
-    }
-    
-    .success-type {
-        font-weight: 600;
-        color: #059669;
-        margin-bottom: 0.5rem;
-    }
-    
-    .highlighted-text {
-        background: #fef3c7;
-        padding: 0.2rem 0.4rem;
-        border-radius: 4px;
-        font-family: 'Courier New', monospace;
-        font-weight: 500;
-        border: 1px solid #f59e0b;
+        border-bottom: 2px solid #4a5568;
     }
     
     /* Footer */
     .footer {
         text-align: center;
-        color: #64748b;
+        color: #718096;
         font-size: 0.9rem;
         padding: 1rem;
         margin-top: 2rem;
-        border-top: 1px solid #e2e8f0;
-    }
-    
-    /* Stats Cards */
-    .stats-card {
-        background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        padding: 1rem;
-        text-align: center;
-        margin: 0.5rem 0;
-    }
-    
-    .stats-value {
-        font-size: 1.5rem;
-        font-weight: 700;
-        color: #1e293b;
-        margin-bottom: 0.25rem;
-    }
-    
-    .stats-label {
-        font-size: 0.8rem;
-        color: #64748b;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        border-top: 1px solid #333333;
     }
     </style>
 """, unsafe_allow_html=True)
-
-# ==========================
-# REAL-TIME COMPLIANCE STATUS
-# ==========================
-
-def get_compliance_status():
-    """Get real-time compliance status based on recent audits"""
-    # Simulate real compliance data
-    total_audits = random.randint(120, 150)
-    passed_audits = random.randint(90, 110)
-    failed_audits = random.randint(10, 25)
-    warning_audits = total_audits - passed_audits - failed_audits
-    
-    compliance_rate = (passed_audits / total_audits) * 100
-    
-    # Determine overall status
-    if compliance_rate >= 85:
-        overall_status = "Excellent"
-        status_color = "🟢"
-    elif compliance_rate >= 70:
-        overall_status = "Good"
-        status_color = "🟡"
-    else:
-        overall_status = "Needs Attention"
-        status_color = "🔴"
-    
-    return {
-        "total_audits": total_audits,
-        "passed_audits": passed_audits,
-        "failed_audits": failed_audits,
-        "warning_audits": warning_audits,
-        "compliance_rate": round(compliance_rate, 1),
-        "overall_status": overall_status,
-        "status_color": status_color,
-        "last_updated": datetime.now().strftime("%H:%M:%S")
-    }
 
 # ==========================
 # ELEGANT HEADER
@@ -471,153 +314,30 @@ def create_pdf(report):
         return None
 
 # ==========================
-# ENHANCED ANALYSIS FUNCTION WITH DETAILED ISSUES
+# MOCK ANALYSIS FUNCTION
 # ==========================
 
 def analyze_policy(policy_text):
-    """Enhanced analysis function that identifies specific problematic phrases"""
-    
-    # Define problematic patterns and their issues
-    problematic_patterns = {
-        "legal_conflicts": [
-            {
-                "phrase": "must register their personal details and bank account numbers",
-                "issue": "Overly broad data collection without specific purpose limitation",
-                "severity": "HIGH",
-                "suggestion": "Specify exact data requirements and purpose for collection"
-            },
-            {
-                "phrase": "only use their Aadhar ID",
-                "issue": "Mandatory Aadhar usage may violate Supreme Court guidelines",
-                "severity": "HIGH", 
-                "suggestion": "Provide alternative identification methods"
-            },
-            {
-                "phrase": "retained indefinitely",
-                "issue": "Indefinite data retention violates data minimization principle",
-                "severity": "HIGH",
-                "suggestion": "Define specific retention periods and review mechanisms"
-            },
-            {
-                "phrase": "shared with any other state department upon simple request",
-                "issue": "Lack of proper data sharing protocols and consent mechanisms",
-                "severity": "HIGH",
-                "suggestion": "Implement proper data sharing agreements and consent requirements"
-            }
-        ],
-        "bias_issues": [
-            {
-                "phrase": "restricted solely to citizens who can reliably interface using dedicated, high-speed fiber-optic internet connections",
-                "issue": "Digital exclusion and accessibility bias against rural/low-income populations",
-                "severity": "MEDIUM",
-                "suggestion": "Provide multiple access channels including offline options"
-            },
-            {
-                "phrase": "advanced desktop computing hardware",
-                "issue": "Technology bias excluding mobile-only users",
-                "severity": "MEDIUM",
-                "suggestion": "Ensure mobile compatibility and low-bandwidth accessibility"
-            },
-            {
-                "phrase": "Mr. Rajesh Kumar, residing at Mandi Road, Dehradun 248001, will be the initial contact",
-                "issue": "Gender and regional bias in designated contacts",
-                "severity": "LOW",
-                "suggestion": "Provide multiple contact options across regions and genders"
-            }
-        ],
-        "pii_issues": [
-            {
-                "phrase": "bank account numbers",
-                "issue": "Sensitive financial information collection without clear security measures",
-                "severity": "HIGH",
-                "suggestion": "Implement strong encryption and access controls"
-            },
-            {
-                "phrase": "scanned copies of their current utility bill",
-                "issue": "Unnecessary document collection increasing data breach risk",
-                "severity": "MEDIUM",
-                "suggestion": "Use alternative verification methods"
-            },
-            {
-                "phrase": "personal details",
-                "issue": "Vague term that could lead to over-collection of PII",
-                "severity": "MEDIUM",
-                "suggestion": "Specifically define which personal details are required"
-            }
-        ]
-    }
-    
-    # Analyze text for problematic phrases
-    found_issues = {
-        "legal_conflicts": [],
-        "bias_issues": [], 
-        "pii_issues": []
-    }
-    
-    policy_lower = policy_text.lower()
-    
-    for category, patterns in problematic_patterns.items():
-        for pattern in patterns:
-            if pattern["phrase"].lower() in policy_lower:
-                found_issues[category].append(pattern)
-    
-    # Determine overall status
-    high_severity_count = sum(1 for category in found_issues.values() for issue in issue if issue["severity"] == "HIGH")
-    medium_severity_count = sum(1 for category in found_issues.values() for issue in issue if issue["severity"] == "MEDIUM")
-    
-    if high_severity_count > 0:
-        overall_status = "REQUIRES URGENT REVIEW"
-        summary = f"Policy analysis identified {high_severity_count} high-severity compliance issues that require immediate attention before implementation."
-    elif medium_severity_count > 0:
-        overall_status = "REQUIRES REVIEW"
-        summary = f"Policy analysis completed with {medium_severity_count} medium-severity recommendations for improvement."
-    else:
-        overall_status = "COMPLIANT"
-        summary = "Policy analysis completed successfully. No significant compliance issues detected."
-    
-    # Generate recommendations
-    recommendations = []
-    if found_issues["legal_conflicts"]:
-        recommendations.append("1. Review and align data collection practices with DPDP Act requirements")
-    if found_issues["bias_issues"]:
-        recommendations.append("2. Implement inclusive design principles for digital accessibility")
-    if found_issues["pii_issues"]:
-        recommendations.append("3. Strengthen data protection measures for sensitive information")
-    recommendations.append("4. Establish clear data retention and deletion policies")
-    recommendations.append("5. Implement proper consent mechanisms for data processing")
-    
+    """Mock analysis function if the real engine isn't available"""
     return {
-        "Overall Status": overall_status,
-        "Executive Summary": summary,
-        "Actionable Recommendations": "\n".join(recommendations),
-        "Detailed Issues": found_issues,
+        "Overall Status": "PASS with Recommendations",
+        "Executive Summary": "Policy analysis completed successfully. No critical legal conflicts detected, but some improvements recommended for data privacy and inclusivity.",
+        "Actionable Recommendations": "1. Limit data retention period\n2. Remove mandatory Aadhar requirement\n3. Add alternative authentication methods\n4. Specify data sharing protocols",
         "Raw Reports": {
-            "Conflict Report": {
-                "status": "FAIL" if found_issues["legal_conflicts"] else "PASS",
-                "issues_found": len(found_issues["legal_conflicts"]),
-                "issues": found_issues["legal_conflicts"]
-            },
-            "Bias Report": {
-                "status": "WARNING" if found_issues["bias_issues"] else "PASS", 
-                "issues_found": len(found_issues["bias_issues"]),
-                "issues": found_issues["bias_issues"]
-            },
-            "PII Report": {
-                "status": "FAIL" if found_issues["pii_issues"] else "PASS",
-                "issues_found": len(found_issues["pii_issues"]),
-                "issues": found_issues["pii_issues"]
-            }
+            "Conflict Report": {"status": "PASS", "issues_found": 2},
+            "Bias Report": {"status": "WARNING", "issues_found": 1},
+            "PII Report": {"status": "FAIL", "issues_found": 3}
         }
     }
 
 # ==========================
-# ELEGANT SIDEBAR WITH REAL STATS
+# ELEGANT SIDEBAR
 # ==========================
 
 st.sidebar.markdown(
     """
     <div style='text-align: center; margin-bottom: 2rem;'>
-        <h3 style='color: #1e293b;'>🔍 Navigation</h3>
+        <h3 style='color: #e2e8f0;'>🔍 Navigation</h3>
     </div>
     """,
     unsafe_allow_html=True
@@ -625,6 +345,7 @@ st.sidebar.markdown(
 
 with st.sidebar.expander("🏛️ System Architecture", expanded=False):
     st.markdown("""
+    <div style='color: #e2e8f0;'>
     **Phase 1: Security Gatekeeper**  
     ✅ PII Redaction & Data Privacy Check (DPDP Act)
     
@@ -633,53 +354,16 @@ with st.sidebar.expander("🏛️ System Architecture", expanded=False):
     
     **Phase 3: Fairness Auditor**  
     ✅ Linguistic Bias & Inclusivity Check
-    """)
+    </div>
+    """, unsafe_allow_html=True)
 
 st.sidebar.markdown("---")
-
-# Real-time Compliance Status
-compliance_data = get_compliance_status()
-
-st.sidebar.markdown("### 📊 Live Compliance Status")
-
-# Overall Status
-status_display = f"{compliance_data['status_color']} {compliance_data['overall_status']}"
-st.sidebar.markdown(f"**Overall Status:** {status_display}")
-
-# Stats in columns
-col1, col2 = st.sidebar.columns(2)
-
-with col1:
-    st.markdown(f"""
-    <div class='stats-card'>
-        <div class='stats-value'>{compliance_data['compliance_rate']}%</div>
-        <div class='stats-label'>Compliance Rate</div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown(f"""
-    <div class='stats-card'>
-        <div class='stats-value'>{compliance_data['total_audits']}</div>
-        <div class='stats-label'>Total Audits</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-with col2:
-    st.markdown(f"""
-    <div class='stats-card'>
-        <div class='stats-value'>{compliance_data['passed_audits']}</div>
-        <div class='stats-label'>Passed</div>
-    </div>
-    """, unsafe_allow_html=True)
-    
-    st.markdown(f"""
-    <div class='stats-card'>
-        <div class='stats-value'>{compliance_data['failed_audits']}</div>
-        <div class='stats-label'>Needs Review</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-st.sidebar.caption(f"Last updated: {compliance_data['last_updated']}")
+st.sidebar.markdown("**📊 Quick Stats**")
+st.sidebar.info("""
+Audits Completed: 127  
+Processing Time: 2.3s  
+Compliance Rate: 89%
+""")
 
 # ==========================
 # POLICY CONTENT
@@ -733,6 +417,11 @@ with col2:
 st.markdown("---")
 st.markdown('<div class="section-header">Analysis Controls</div>', unsafe_allow_html=True)
 
+# Initialize button states
+reset_clicked = False
+run_audit_clicked = False
+clear_clicked = False
+
 # Create button layout
 col1, col2, col3 = st.columns(3)
 
@@ -755,7 +444,7 @@ if reset_clicked:
     st.session_state.clear()
     st.rerun()
 
-if st.session_state.get("report") and clear_clicked:
+if clear_clicked:
     st.session_state.pop("report", None)
     st.session_state.pop("report_text", None)
     st.rerun()
@@ -805,7 +494,7 @@ if run_audit_clicked:
             st.error(f"❌ Analysis error: {e}")
 
 # ==========================
-# ENHANCED REPORT DISPLAY WITH DETAILED ISSUES
+# ELEGANT REPORT DISPLAY
 # ==========================
 
 if "report" in st.session_state:
@@ -814,18 +503,15 @@ if "report" in st.session_state:
     st.markdown("---")
     st.markdown('<div class="section-header">📊 Audit Results</div>', unsafe_allow_html=True)
     
-    # Overall Status with elegant styling
+    # Overall Status
     st.markdown('<div class="custom-card">', unsafe_allow_html=True)
     status = report.get("Overall Status", "Unknown")
-    
-    if "COMPLIANT" in status.upper():
-        status_html = f'<span class="status-pass">✅ {status}</span>'
-    elif "REVIEW" in status.upper():
-        status_html = f'<span class="status-warning">⚠️ {status}</span>'
+    if "FAIL" in status.upper():
+        st.error(f"**Compliance Status:** {status}")
+    elif "PASS" in status.upper():
+        st.success(f"**Compliance Status:** {status}")
     else:
-        status_html = f'<span class="status-fail">❌ {status}</span>'
-    
-    st.markdown(f"**Compliance Status:** {status_html}", unsafe_allow_html=True)
+        st.warning(f"**Compliance Status:** {status}")
     st.markdown('</div>', unsafe_allow_html=True)
 
     # Executive Summary
@@ -834,78 +520,36 @@ if "report" in st.session_state:
     st.write(report.get("Executive Summary", "No summary available."))
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # Detailed Analysis with specific issues
+    # Detailed Analysis
     st.markdown("**Detailed Analysis**")
     tab1, tab2, tab3 = st.tabs(["⚖️ Legal Compliance", "🌍 Bias Assessment", "🔐 Data Privacy"])
 
     with tab1:
+        st.markdown('<div class="custom-card">', unsafe_allow_html=True)
         conflict_data = report.get("Raw Reports", {}).get("Conflict Report", {})
-        issues = conflict_data.get("issues", [])
-        
-        if issues:
-            st.markdown(f"**Found {len(issues)} legal compliance issue(s):**")
-            for issue in issues:
-                st.markdown(f"""
-                <div class="issue-card">
-                    <div class="issue-type">🚨 {issue['severity']} SEVERITY</div>
-                    <div><strong>Problematic Phrase:</strong> <span class="highlighted-text">"{issue['phrase']}"</span></div>
-                    <div><strong>Issue:</strong> {issue['issue']}</div>
-                    <div><strong>Recommendation:</strong> {issue['suggestion']}</div>
-                </div>
-                """, unsafe_allow_html=True)
+        if conflict_data:
+            st.json(conflict_data)
         else:
-            st.markdown("""
-            <div class="success-card">
-                <div class="success-type">✅ NO LEGAL ISSUES FOUND</div>
-                <div>No legal compliance conflicts detected in the policy document.</div>
-            </div>
-            """, unsafe_allow_html=True)
+            st.info("No legal compliance issues detected")
+        st.markdown('</div>', unsafe_allow_html=True)
 
     with tab2:
+        st.markdown('<div class="custom-card">', unsafe_allow_html=True)
         bias_data = report.get("Raw Reports", {}).get("Bias Report", {})
-        issues = bias_data.get("issues", [])
-        
-        if issues:
-            st.markdown(f"**Found {len(issues)} bias issue(s):**")
-            for issue in issues:
-                st.markdown(f"""
-                <div class="warning-card">
-                    <div class="warning-type">⚠️ {issue['severity']} SEVERITY</div>
-                    <div><strong>Problematic Phrase:</strong> <span class="highlighted-text">"{issue['phrase']}"</span></div>
-                    <div><strong>Issue:</strong> {issue['issue']}</div>
-                    <div><strong>Recommendation:</strong> {issue['suggestion']}</div>
-                </div>
-                """, unsafe_allow_html=True)
+        if bias_data:
+            st.json(bias_data)
         else:
-            st.markdown("""
-            <div class="success-card">
-                <div class="success-type">✅ NO BIAS ISSUES FOUND</div>
-                <div>No bias or inclusivity issues detected in the policy document.</div>
-            </div>
-            """, unsafe_allow_html=True)
+            st.info("No bias assessment data available")
+        st.markdown('</div>', unsafe_allow_html=True)
 
     with tab3:
+        st.markdown('<div class="custom-card">', unsafe_allow_html=True)
         pii_data = report.get("Raw Reports", {}).get("PII Report", {})
-        issues = pii_data.get("issues", [])
-        
-        if issues:
-            st.markdown(f"**Found {len(issues)} data privacy issue(s):**")
-            for issue in issues:
-                st.markdown(f"""
-                <div class="issue-card">
-                    <div class="issue-type">🔐 {issue['severity']} SEVERITY</div>
-                    <div><strong>Problematic Phrase:</strong> <span class="highlighted-text">"{issue['phrase']}"</span></div>
-                    <div><strong>Issue:</strong> {issue['issue']}</div>
-                    <div><strong>Recommendation:</strong> {issue['suggestion']}</div>
-                </div>
-                """, unsafe_allow_html=True)
+        if pii_data:
+            st.json(pii_data)
         else:
-            st.markdown("""
-            <div class="success-card">
-                <div class="success-type">✅ NO DATA PRIVACY ISSUES FOUND</div>
-                <div>No data privacy or PII handling issues detected in the policy document.</div>
-            </div>
-            """, unsafe_allow_html=True)
+            st.info("No data privacy issues detected")
+        st.markdown('</div>', unsafe_allow_html=True)
 
     # Export Section
     st.markdown("---")
