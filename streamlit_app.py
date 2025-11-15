@@ -27,10 +27,10 @@ st.markdown("""
         margin-top: -2rem;
         margin-bottom: 1rem;
         padding: 2rem 0;
-        background: linear-gradient(135deg, #138808 0%, #FF9933 100%);
+        background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
         border-radius: 16px;
         color: #ffffff;
-        border: 1px solid #FF9933;
+        border: 1px solid #3b82f6;
         box-shadow: 0 8px 32px rgba(0,0,0,0.1);
     }
     .main-header h1 {
@@ -481,13 +481,13 @@ st.sidebar.markdown(
 
 with st.sidebar.expander("🏛 System Architecture", expanded=False):
     st.markdown("""
-    *Phase 1: Security Gatekeeper*  
+    Phase 1: Security Gatekeeper  
     ✅ PII Redaction & Data Privacy Check (DPDP Act)
     
-    *Phase 2: Legal Analyzer*  
+    Phase 2: Legal Analyzer  
     ✅ Semantic Conflict Detection (FAISS DB)
     
-    *Phase 3: Fairness Auditor*  
+    Phase 3: Fairness Auditor  
     ✅ Linguistic Bias & Inclusivity Check
     """)
 
@@ -500,7 +500,7 @@ st.sidebar.markdown("### 📊 Live Compliance Status")
 
 # Overall Status
 status_display = f"{compliance_data['status_color']} {compliance_data['overall_status']}"
-st.sidebar.markdown(f"*Overall Status:* {status_display}")
+st.sidebar.markdown(f"Overall Status: {status_display}")
 
 # Stats in columns
 col1, col2 = st.sidebar.columns(2)
@@ -563,7 +563,7 @@ st.markdown('<div class="section-header">Policy Document Analysis</div>', unsafe
 col1, col2 = st.columns([3, 1])
 
 with col1:
-    st.markdown("*Policy Draft to Audit*")
+    st.markdown("Policy Draft to Audit")
     policy_input = st.text_area(
         "Policy Draft to Audit:",
         value=placeholder_policy,
@@ -572,7 +572,7 @@ with col1:
     )
 
 with col2:
-    st.markdown("*Document Controls*")
+    st.markdown("Document Controls")
     uploaded_file = st.file_uploader(
         "Upload Document",
         type=['txt', 'pdf', 'docx', 'doc'],
@@ -681,7 +681,7 @@ if "report" in st.session_state:
     else:
         status_html = f'<span class="status-fail">❌ {status}</span>'
     
-    st.markdown(f"*Compliance Status:* {status_html}", unsafe_allow_html=True)
+    st.markdown(f"Compliance Status: {status_html}", unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
     # Executive Summary
@@ -724,11 +724,11 @@ if "report" in st.session_state:
                 st.markdown('<span class="status-fail">❌ REQUIRES REVIEW</span>', unsafe_allow_html=True)
             
             # Issues summary
-            st.markdown(f"**Issues Found:** {issues_found}")
+            st.markdown(f"*Issues Found:* {issues_found}")
             
             # Detailed findings
             if issues_found > 0:
-                st.markdown("**Key Findings:**")
+                st.markdown("*Key Findings:*")
                 findings = conflict_data.get("findings", [])
                 if findings:
                     for i, finding in enumerate(findings, 1):
@@ -738,7 +738,7 @@ if "report" in st.session_state:
                     st.markdown("- Review required for statutory compliance")
                     st.markdown("- Consider legal consultation for ambiguous clauses")
             else:
-                st.markdown("**Assessment:** No legal conflicts detected. Policy appears compliant with existing legislation.")
+                st.markdown("*Assessment:* No legal conflicts detected. Policy appears compliant with existing legislation.")
                 
         else:
             st.info("No legal compliance data available for analysis")
@@ -762,11 +762,11 @@ if "report" in st.session_state:
                 st.markdown('<span class="status-fail">❌ REQUIRES REVIEW</span>', unsafe_allow_html=True)
             
             # Issues summary
-            st.markdown(f"**Bias Issues Identified:** {issues_found}")
+            st.markdown(f"*Bias Issues Identified:* {issues_found}")
             
             # Detailed findings
             if issues_found > 0:
-                st.markdown("**Identified Concerns:**")
+                st.markdown("*Identified Concerns:*")
                 concerns = bias_data.get("concerns", [])
                 if concerns:
                     for i, concern in enumerate(concerns, 1):
@@ -776,7 +776,7 @@ if "report" in st.session_state:
                     st.markdown("- Language inclusivity considerations")
                     st.markdown("- Demographic representation review")
             else:
-                st.markdown("**Assessment:** No significant bias detected. Policy language appears inclusive and equitable.")
+                st.markdown("*Assessment:* No significant bias detected. Policy language appears inclusive and equitable.")
                 
         else:
             st.info("No bias assessment data available")
@@ -800,11 +800,11 @@ if "report" in st.session_state:
                 st.markdown('<span class="status-fail">❌ REQUIRES REVIEW</span>', unsafe_allow_html=True)
             
             # Issues summary
-            st.markdown(f"**Privacy Issues Found:** {issues_found}")
+            st.markdown(f"*Privacy Issues Found:* {issues_found}")
             
             # Detailed findings
             if issues_found > 0:
-                st.markdown("**Privacy Concerns:**")
+                st.markdown("*Privacy Concerns:*")
                 privacy_issues = pii_data.get("privacy_issues", [])
                 if privacy_issues:
                     for i, issue in enumerate(privacy_issues, 1):
@@ -815,12 +815,12 @@ if "report" in st.session_state:
                     st.markdown("- Consent mechanism evaluation needed")
                     
                 # Compliance references
-                st.markdown("**Relevant Regulations:**")
+                st.markdown("*Relevant Regulations:*")
                 st.markdown("- DPDP Act, 2023 compliance")
                 st.markdown("- IT Act, 2000 amendments")
                 st.markdown("- State data protection guidelines")
             else:
-                st.markdown("**Assessment:** Data privacy measures appear adequate. PII handling complies with regulatory requirements.")
+                st.markdown("*Assessment:* Data privacy measures appear adequate. PII handling complies with regulatory requirements.")
                 
         else:
             st.info("No data privacy issues detected")
@@ -863,7 +863,7 @@ if "report" in st.session_state:
     
     with col1:
         st.markdown('<div class="custom-card">', unsafe_allow_html=True)
-        st.markdown("*PDF Report*")
+        st.markdown("PDF Report")
         pdf_bytes = create_pdf(report)
         if pdf_bytes:
             st.download_button(
@@ -877,7 +877,7 @@ if "report" in st.session_state:
 
     with col2:
         st.markdown('<div class="custom-card">', unsafe_allow_html=True)
-        st.markdown("*Raw Data*")
+        st.markdown("Raw Data")
         json_str = json.dumps(report, indent=2)
         st.download_button(
             label="📊 Download JSON Data",
