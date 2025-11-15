@@ -27,10 +27,10 @@ st.markdown("""
         margin-top: -2rem;
         margin-bottom: 1rem;
         padding: 2rem 0;
-        background: linear-gradient(135deg, #138808 0%, #FF9933 100%);
+        background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
         border-radius: 16px;
         color: #ffffff;
-        border: 1px solid #FF9933;
+        border: 1px solid #f59e0b;
         box-shadow: 0 8px 32px rgba(0,0,0,0.1);
     }
     .main-header h1 {
