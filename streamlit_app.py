@@ -27,10 +27,10 @@ st.markdown("""
         margin-top: -2rem;
         margin-bottom: 1rem;
         padding: 2rem 0;
-        background: linear-gradient(135deg, #138808 0%, #FF9933 100%);
+        background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
         border-radius: 16px;
         color: #ffffff;
-        border: 1px solid #FF9933;
+        border: 1px solid #3b82f6;
         box-shadow: 0 8px 32px rgba(0,0,0,0.1);
     }
     .main-header h1 {
@@ -416,79 +416,51 @@ def create_pdf(report):
         return None
 
 # ==========================
-# MOCK ANALYSIS FUNCTION - FIXED
+# MOCK ANALYSIS FUNCTION
 # ==========================
 
 def analyze_policy(policy_text):
-    """Mock analysis function with proper structure"""
-    # Analyze the policy content
+    """Mock analysis function if the real engine isn't available"""
+    # Simulate realistic analysis results
     issues_found = random.randint(0, 5)
     
-    # Create detailed executive summary based on content analysis
-    if "Aadhar" in policy_text and "indefinitely" in policy_text:
-        status = "REQUIRES REVIEW"
-        summary = """Policy analysis identified critical compliance concerns. The draft policy references Aadhar data handling without proper data retention limits, which conflicts with DPDP Act requirements. Additionally, the policy contains specific individual references and potentially exclusionary access requirements that need immediate attention."""
-        
-        recommendations = """1. **Immediate Action Required**: Remove indefinite data retention clause and specify compliant retention periods
-2. **Data Protection**: Implement explicit consent mechanisms for Aadhar data usage
-3. **Inclusivity**: Revise access requirements to ensure digital inclusivity
-4. **Privacy Compliance**: Add data breach notification protocols
-5. **Legal Review**: Consult with legal team on Aadhar data sharing provisions"""
-        
-    elif "bank account" in policy_text and "shared" in policy_text:
-        status = "WARNING"
-        summary = """Policy analysis completed with significant recommendations. The draft policy includes sensitive financial data collection and sharing provisions that require stronger safeguards. No critical blockers identified, but substantial revisions recommended for optimal compliance."""
-        
-        recommendations = """1. **Data Minimization**: Limit bank account data collection to essential purposes only
-2. **Sharing Restrictions**: Implement strict data sharing protocols with other departments
-3. **Encryption**: Mandate end-to-end encryption for financial data
-4. **Audit Trail**: Establish comprehensive data access logging
-5. **Citizen Consent**: Enhance explicit consent mechanisms for data sharing"""
-        
-    else:
+    if issues_found == 0:
         status = "PASS"
-        summary = """Policy analysis completed successfully. The draft demonstrates good compliance awareness with minor optimization opportunities. No critical issues detected - policy aligns well with regulatory requirements and governance best practices."""
-        
-        recommendations = """1. **Optimization**: Consider adding data classification guidelines
-2. **Enhancement**: Include periodic compliance review mechanisms
-3. **Documentation**: Maintain detailed implementation records
-4. **Training**: Develop staff training on policy provisions"""
+        summary = "Policy analysis completed successfully. No compliance issues detected. The policy meets all regulatory requirements."
+    elif issues_found <= 2:
+        status = "PASS with Recommendations"
+        summary = "Policy analysis completed with minor recommendations. No critical compliance issues found, but some improvements suggested for optimal alignment."
+    else:
+        status = "REQUIRES REVIEW"
+        summary = "Policy analysis identified several compliance concerns that require attention before implementation."
     
-    # Detailed analysis findings
     return {
         "Overall Status": status,
         "Executive Summary": summary,
-        "Actionable Recommendations": recommendations,
+        "Actionable Recommendations": "1. Review data retention policies\n2. Ensure proper consent mechanisms\n3. Update privacy notice language\n4. Implement data breach protocols",
         "Raw Reports": {
             "Conflict Report": {
-                "status": "PASS" if status == "PASS" else "WARNING",
-                "issues_found": random.randint(0, 3),
+                "status": "PASS", 
+                "issues_found": random.randint(0, 2),
                 "findings": [
-                    "Alignment with DPDP Act data protection principles verified",
-                    "No conflicts with IT Act 2000 amendments detected",
-                    "State governance framework compliance confirmed"
-                ] if status == "PASS" else [
-                    "Potential conflict with data minimization principle",
-                    "Review required for data sharing provisions",
-                    "Consider legal consultation for ambiguous clauses"
+                    "No conflicts with existing state legislation",
+                    "Alignment with DPDP Act requirements verified"
                 ]
             },
             "Bias Report": {
-                "status": "WARNING",
-                "issues_found": random.randint(1, 2),
+                "status": "WARNING", 
+                "issues_found": random.randint(0, 1),
                 "concerns": [
-                    "Digital access requirements may exclude rural populations",
-                    "Language should be more inclusive for diverse citizen groups",
-                    "Consider alternative authentication methods"
+                    "Potential accessibility barriers in digital service delivery",
+                    "Language inclusivity considerations needed"
                 ]
             },
             "PII Report": {
-                "status": "PASS" if status == "PASS" else "WARNING",
+                "status": "PASS", 
                 "issues_found": random.randint(0, 2),
                 "privacy_issues": [
-                    "Aadhar data handling requires explicit consent mechanisms",
-                    "Data retention policies need specification",
-                    "Encryption standards should be explicitly stated"
+                    "Data retention period requires specification",
+                    "Consent mechanisms need explicit mention"
                 ]
             }
         }
@@ -509,13 +481,13 @@ st.sidebar.markdown(
 
 with st.sidebar.expander("🏛 System Architecture", expanded=False):
     st.markdown("""
-    *Phase 1: Security Gatekeeper*  
+    Phase 1: Security Gatekeeper  
     ✅ PII Redaction & Data Privacy Check (DPDP Act)
     
-    *Phase 2: Legal Analyzer*  
+    Phase 2: Legal Analyzer  
     ✅ Semantic Conflict Detection (FAISS DB)
     
-    *Phase 3: Fairness Auditor*  
+    Phase 3: Fairness Auditor  
     ✅ Linguistic Bias & Inclusivity Check
     """)
 
@@ -528,7 +500,7 @@ st.sidebar.markdown("### 📊 Live Compliance Status")
 
 # Overall Status
 status_display = f"{compliance_data['status_color']} {compliance_data['overall_status']}"
-st.sidebar.markdown(f"*Overall Status:* {status_display}")
+st.sidebar.markdown(f"Overall Status: {status_display}")
 
 # Stats in columns
 col1, col2 = st.sidebar.columns(2)
@@ -591,7 +563,7 @@ st.markdown('<div class="section-header">Policy Document Analysis</div>', unsafe
 col1, col2 = st.columns([3, 1])
 
 with col1:
-    st.markdown("*Policy Draft to Audit*")
+    st.markdown("Policy Draft to Audit")
     policy_input = st.text_area(
         "Policy Draft to Audit:",
         value=placeholder_policy,
@@ -600,7 +572,7 @@ with col1:
     )
 
 with col2:
-    st.markdown("*Document Controls*")
+    st.markdown("Document Controls")
     uploaded_file = st.file_uploader(
         "Upload Document",
         type=['txt', 'pdf', 'docx', 'doc'],
@@ -689,7 +661,7 @@ if run_audit_clicked:
             st.error(f"❌ Analysis error: {e}")
 
 # ==========================
-# ELEGANT REPORT DISPLAY - FIXED EXECUTIVE SUMMARY
+# ELEGANT REPORT DISPLAY
 # ==========================
 
 if "report" in st.session_state:
@@ -709,14 +681,13 @@ if "report" in st.session_state:
     else:
         status_html = f'<span class="status-fail">❌ {status}</span>'
     
-    st.markdown(f"**Compliance Status:** {status_html}", unsafe_allow_html=True)
+    st.markdown(f"Compliance Status: {status_html}", unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # Executive Summary - FIXED: Now properly displays
+    # Executive Summary
     st.markdown('<div class="custom-card">', unsafe_allow_html=True)
     st.markdown("### 📋 Executive Summary")
-    executive_summary = report.get("Executive Summary", "No executive summary available.")
-    st.write(executive_summary)
+    st.write(report.get("Executive Summary", "No summary available."))
     st.markdown('</div>', unsafe_allow_html=True)
 
     # Actionable Recommendations
@@ -725,7 +696,8 @@ if "report" in st.session_state:
     recommendations = report.get("Actionable Recommendations", "No specific recommendations provided.")
     if isinstance(recommendations, str):
         # Format the recommendations with proper line breaks
-        st.markdown(recommendations)
+        formatted_recs = recommendations.replace('\n', '  \n')  # Markdown line breaks
+        st.markdown(formatted_recs)
     else:
         st.write(recommendations)
     st.markdown('</div>', unsafe_allow_html=True)
@@ -752,11 +724,11 @@ if "report" in st.session_state:
                 st.markdown('<span class="status-fail">❌ REQUIRES REVIEW</span>', unsafe_allow_html=True)
             
             # Issues summary
-            st.markdown(f"**Issues Found:** {issues_found}")
+            st.markdown(f"*Issues Found:* {issues_found}")
             
             # Detailed findings
             if issues_found > 0:
-                st.markdown("**Key Findings:**")
+                st.markdown("*Key Findings:*")
                 findings = conflict_data.get("findings", [])
                 if findings:
                     for i, finding in enumerate(findings, 1):
@@ -766,7 +738,7 @@ if "report" in st.session_state:
                     st.markdown("- Review required for statutory compliance")
                     st.markdown("- Consider legal consultation for ambiguous clauses")
             else:
-                st.markdown("**Assessment:** No legal conflicts detected. Policy appears compliant with existing legislation.")
+                st.markdown("*Assessment:* No legal conflicts detected. Policy appears compliant with existing legislation.")
                 
         else:
             st.info("No legal compliance data available for analysis")
@@ -790,11 +762,11 @@ if "report" in st.session_state:
                 st.markdown('<span class="status-fail">❌ REQUIRES REVIEW</span>', unsafe_allow_html=True)
             
             # Issues summary
-            st.markdown(f"**Bias Issues Identified:** {issues_found}")
+            st.markdown(f"*Bias Issues Identified:* {issues_found}")
             
             # Detailed findings
             if issues_found > 0:
-                st.markdown("**Identified Concerns:**")
+                st.markdown("*Identified Concerns:*")
                 concerns = bias_data.get("concerns", [])
                 if concerns:
                     for i, concern in enumerate(concerns, 1):
@@ -804,7 +776,7 @@ if "report" in st.session_state:
                     st.markdown("- Language inclusivity considerations")
                     st.markdown("- Demographic representation review")
             else:
-                st.markdown("**Assessment:** No significant bias detected. Policy language appears inclusive and equitable.")
+                st.markdown("*Assessment:* No significant bias detected. Policy language appears inclusive and equitable.")
                 
         else:
             st.info("No bias assessment data available")
@@ -828,11 +800,11 @@ if "report" in st.session_state:
                 st.markdown('<span class="status-fail">❌ REQUIRES REVIEW</span>', unsafe_allow_html=True)
             
             # Issues summary
-            st.markdown(f"**Privacy Issues Found:** {issues_found}")
+            st.markdown(f"*Privacy Issues Found:* {issues_found}")
             
             # Detailed findings
             if issues_found > 0:
-                st.markdown("**Privacy Concerns:**")
+                st.markdown("*Privacy Concerns:*")
                 privacy_issues = pii_data.get("privacy_issues", [])
                 if privacy_issues:
                     for i, issue in enumerate(privacy_issues, 1):
@@ -843,12 +815,12 @@ if "report" in st.session_state:
                     st.markdown("- Consent mechanism evaluation needed")
                     
                 # Compliance references
-                st.markdown("**Relevant Regulations:**")
+                st.markdown("*Relevant Regulations:*")
                 st.markdown("- DPDP Act, 2023 compliance")
                 st.markdown("- IT Act, 2000 amendments")
                 st.markdown("- State data protection guidelines")
             else:
-                st.markdown("**Assessment:** Data privacy measures appear adequate. PII handling complies with regulatory requirements.")
+                st.markdown("*Assessment:* Data privacy measures appear adequate. PII handling complies with regulatory requirements.")
                 
         else:
             st.info("No data privacy issues detected")
@@ -891,7 +863,7 @@ if "report" in st.session_state:
     
     with col1:
         st.markdown('<div class="custom-card">', unsafe_allow_html=True)
-        st.markdown("*PDF Report*")
+        st.markdown("PDF Report")
         pdf_bytes = create_pdf(report)
         if pdf_bytes:
             st.download_button(
@@ -905,7 +877,7 @@ if "report" in st.session_state:
 
     with col2:
         st.markdown('<div class="custom-card">', unsafe_allow_html=True)
-        st.markdown("*Raw Data*")
+        st.markdown("Raw Data")
         json_str = json.dumps(report, indent=2)
         st.download_button(
             label="📊 Download JSON Data",
