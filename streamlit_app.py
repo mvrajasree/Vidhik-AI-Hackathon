@@ -14,16 +14,19 @@ st.set_page_config(
 )
 
 # ==========================
-# MINIMAL STYLING (Theme-safe)
+# CLEAN STYLING
 # ==========================
 
 st.markdown("""
     <style>
     .main-header {
         text-align: center;
-        padding: 1.5rem 0;
-        border-radius: 10px;
+        margin-top: -2rem;
         margin-bottom: 1rem;
+        padding: 1.5rem 0;
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        border-radius: 10px;
+        color: white;
     }
     .main-header h1 {
         margin-bottom: 0.5rem;
@@ -36,33 +39,80 @@ st.markdown("""
         font-weight: 400;
         opacity: 0.9;
     }
-    .section-divider {
-        margin: 2rem 0;
-        border-top: 2px solid var(--secondary-background-color);
+    .section-header {
+        border-bottom: 2px solid #1e3c72;
+        padding-bottom: 0.5rem;
+        margin-bottom: 1rem;
+        color: #1e3c72 !important;
+        font-weight: 600;
+        font-size: 1.4rem;
+    }
+    .action-card {
+        background-color: #f8fafc;
+        padding: 1.5rem;
+        border-radius: 10px;
+        border-left: 4px solid #1e3c72;
+        margin-bottom: 1rem;
+    }
+    .stButton button {
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    .stButton button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .success-msg {
+        background-color: #f0fff4;
+        border: 1px solid #9ae6b4;
+        border-radius: 8px;
+        padding: 0.75rem;
+        margin: 0.5rem 0;
+        color: #22543d;
+    }
+    .report-section {
+        background-color: white;
+        padding: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin: 1rem 0;
+        border: 1px solid #e2e8f0;
+    }
+    .compact-section {
+        margin: 0.5rem 0;
+        padding: 0;
+    }
+    /* Remove extra padding from Streamlit elements */
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+    }
+    .stTextArea textarea {
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
     }
     </style>
 """, unsafe_allow_html=True)
 
 # ==========================
-# HEADER
+# PROFESSIONAL HEADER
 # ==========================
 
-col1, col2, col3 = st.columns([1, 2, 1])
-with col2:
-    st.markdown(
-        """
-        <div class='main-header'>
-            <h1>⚖️ Vidhik AI</h1>
-            <h3>Governance Gateway for the Government of Uttarakhand</h3>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+st.markdown(
+    """
+    <div class='main-header'>
+        <h1>⚖️ Vidhik AI</h1>
+        <h3>Governance Gateway for the Government of Uttarakhand</h3>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 st.info("📋 Upload your policy draft or use the sample text below to conduct a comprehensive compliance audit.")
 
 # ==========================
-# PDF GENERATOR
+# SIMPLIFIED PDF GENERATOR
 # ==========================
 
 def create_pdf(report):
@@ -146,10 +196,17 @@ def analyze_policy(policy_text):
     }
 
 # ==========================
-# SIDEBAR
+# CLEAN SIDEBAR
 # ==========================
 
-st.sidebar.title("🔍 Navigation")
+st.sidebar.markdown(
+    """
+    <div style='text-align: center; margin-bottom: 1rem;'>
+        <h3 style='color: #1e3c72;'>🔍 Navigation</h3>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 with st.sidebar.expander("🏛️ System Architecture", expanded=False):
     st.markdown("""
@@ -189,10 +246,10 @@ Access to DSDP services is restricted solely to citizens who can reliably interf
 """
 
 # ==========================
-# MAIN CONTENT AREA
+# COMPACT MAIN CONTENT AREA
 # ==========================
 
-st.subheader("Policy Document Analysis")
+st.markdown("### Policy Document Analysis")
 
 col1, col2 = st.columns([3, 1])
 
@@ -210,42 +267,47 @@ with col2:
     uploaded_file = st.file_uploader(
         "Upload Document",
         type=['txt', 'pdf', 'docx', 'doc'],
-        help="Supported formats: TXT, PDF, DOCX, DOC",
-        label_visibility="collapsed"
+        help="Supported formats: TXT, PDF, DOCX, DOC"
     )
     if uploaded_file:
         st.success(f"✅ {uploaded_file.name}")
 
 # ==========================
-# ACTION CONTROLS
+# ALIGNED ACTION CONTROLS
 # ==========================
 
 st.markdown("---")
-st.subheader("Analysis Controls")
 
-# Initialize button states
+# Initialize variables
 reset_clicked = False
-run_audit_clicked = False
 clear_clicked = False
+run_audit = False
 
-# Create button layout
-col1, col2, col3 = st.columns(3)
+# Create a container for aligned buttons
+button_col1, button_col2, button_col3 = st.columns([1, 2, 1])
 
-with col1:
+with button_col1:
+    use_sample = st.checkbox("Use sample policy", value=True)
     reset_clicked = st.button("🔄 Reset Text", use_container_width=True)
 
-with col2:
-    run_audit_clicked = st.button(
+with button_col2:
+    # Center the main audit button
+    run_audit = st.button(
         "🚀 Run Comprehensive Audit", 
         type="primary", 
-        use_container_width=True
+        use_container_width=True,
+        help="Initiate full policy analysis"
     )
 
-with col3:
+with button_col3:
+    # Right-align the clear button
     if st.session_state.get("report"):
         clear_clicked = st.button("🗑️ Clear Results", use_container_width=True, type="secondary")
+    else:
+        # Placeholder to maintain alignment
+        st.empty()
 
-# Handle button actions immediately
+# Handle button actions
 if reset_clicked:
     st.session_state.clear()
     st.rerun()
@@ -259,25 +321,27 @@ if clear_clicked:
 # AUDIT PROCESSING
 # ==========================
 
-if run_audit_clicked:
-    # Process uploaded file or use text area content
-    final_text = policy_input
-    
+if run_audit:
+    input_text = ""
     if uploaded_file:
         try:
             if uploaded_file.type == "text/plain":
-                final_text = str(uploaded_file.read(), "utf-8")
+                input_text = str(uploaded_file.read(), "utf-8")
             elif uploaded_file.type == "application/pdf":
                 import PyPDF2
                 reader = PyPDF2.PdfReader(uploaded_file)
-                final_text = "\n".join([page.extract_text() for page in reader.pages])
+                input_text = "\n".join([page.extract_text() for page in reader.pages])
             elif uploaded_file.type in ["application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                                         "application/msword"]:
                 import docx
                 doc = docx.Document(uploaded_file)
-                final_text = "\n".join([p.text for p in doc.paragraphs])
+                input_text = "\n".join([p.text for p in doc.paragraphs])
+            final_text = input_text if input_text else policy_input
         except Exception as e:
             st.error(f"❌ File processing error: {e}")
+            final_text = policy_input
+    else:
+        final_text = policy_input
 
     if not final_text.strip():
         st.error("Please provide policy text for analysis.")
@@ -285,7 +349,6 @@ if run_audit_clicked:
 
     with st.spinner("🔍 Conducting comprehensive policy analysis..."):
         try:
-            # Try to import the real analyzer, fall back to mock
             try:
                 from vidhik_engine import analyze_policy as real_analyze_policy
                 final_report = real_analyze_policy(final_text)
@@ -300,29 +363,33 @@ if run_audit_clicked:
             st.error(f"❌ Analysis error: {e}")
 
 # ==========================
-# REPORT DISPLAY
+# CLEAN REPORT DISPLAY
 # ==========================
 
 if "report" in st.session_state:
     report = st.session_state["report"]
     
     st.markdown("---")
-    st.subheader("📊 Audit Results")
+    st.markdown("### 📊 Audit Results")
     
-    # Overall Status
-    status = report.get("Overall Status", "Unknown")
-    if "FAIL" in status.upper():
-        st.error(f"**Compliance Status:** {status}")
-    elif "PASS" in status.upper():
-        st.success(f"**Compliance Status:** {status}")
-    else:
-        st.warning(f"**Compliance Status:** {status}")
+    # Overall Status - Compact
+    status_col1, status_col2 = st.columns([1, 4])
+    with status_col1:
+        st.markdown("**Compliance Status**")
+    with status_col2:
+        status = report.get("Overall Status", "Unknown")
+        if "FAIL" in status.upper():
+            st.error(f"**{status}**")
+        elif "PASS" in status.upper():
+            st.success(f"**{status}**")
+        else:
+            st.warning(f"**{status}**")
 
-    # Executive Summary
+    # Executive Summary - Compact
     st.markdown("**Executive Summary**")
     st.write(report.get("Executive Summary", "No summary available."))
 
-    # Detailed Analysis
+    # Detailed Analysis - Compact
     st.markdown("**Detailed Analysis**")
     tab1, tab2, tab3 = st.tabs(["⚖️ Legal Compliance", "🌍 Bias Assessment", "🔐 Data Privacy"])
 
@@ -347,29 +414,29 @@ if "report" in st.session_state:
         else:
             st.info("No data privacy issues detected")
 
-    # Export Section
+    # Export Section - Compact
     st.markdown("---")
-    st.subheader("📤 Export Results")
+    st.markdown("### 📤 Export Results")
     
-    col1, col2 = st.columns(2)
+    export_col1, export_col2 = st.columns(2)
     
-    with col1:
+    with export_col1:
         st.markdown("**PDF Report**")
         pdf_bytes = create_pdf(report)
         if pdf_bytes:
             st.download_button(
-                label="Download PDF Report",
+                label="Download PDF",
                 data=pdf_bytes,
                 file_name="VidhikAI_Audit_Report.pdf",
                 mime="application/pdf",
                 use_container_width=True
             )
 
-    with col2:
+    with export_col2:
         st.markdown("**Raw Data**")
         json_str = json.dumps(report, indent=2)
         st.download_button(
-            label="Download JSON Data",
+            label="Download JSON",
             data=json_str,
             file_name="VidhikAI_Audit_Data.json",
             mime="application/json",
@@ -381,8 +448,15 @@ if "report" in st.session_state:
         st.json(report)
 
 # ==========================
-# FOOTER
+# CLEAN FOOTER
 # ==========================
 
 st.markdown("---")
-st.caption("Vidhik AI • Government of Uttarakhand • DPDP Act Compliance • IT Act 2000 • 2025")
+st.markdown(
+    """
+    <div style='text-align: center; color: #1e3c72; font-size: 0.9rem; padding: 1rem; font-weight: 500;'>
+        <strong>Vidhik AI</strong> • Government of Uttarakhand • DPDP Act Compliance • IT Act 2000 • 2025
+    </div>
+    """,
+    unsafe_allow_html=True
+)
