@@ -10,7 +10,7 @@ from datetime import datetime
 
 st.set_page_config(
     page_title="Vidhik AI: Governance Gateway",
-    page_icon="⚖️",
+    page_icon="⚖",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -27,10 +27,10 @@ st.markdown("""
         margin-top: -2rem;
         margin-bottom: 1rem;
         padding: 2rem 0;
-        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+        background: linear-gradient(135deg, #138808 0%, #FF9933 100%);
         border-radius: 16px;
         color: #ffffff;
-        border: 1px solid #475569;
+        border: 1px solid #FF9933;
         box-shadow: 0 8px 32px rgba(0,0,0,0.1);
     }
     .main-header h1 {
@@ -339,7 +339,7 @@ def get_compliance_status():
 st.markdown(
     """
     <div class='main-header'>
-        <h1>⚖️ Vidhik AI</h1>
+        <h1>⚖ Vidhik AI</h1>
         <h3>Governance Gateway for the Government of Uttarakhand</h3>
     </div>
     """,
@@ -458,15 +458,15 @@ st.sidebar.markdown(
     unsafe_allow_html=True
 )
 
-with st.sidebar.expander("🏛️ System Architecture", expanded=False):
+with st.sidebar.expander("🏛 System Architecture", expanded=False):
     st.markdown("""
-    **Phase 1: Security Gatekeeper**  
+    *Phase 1: Security Gatekeeper*  
     ✅ PII Redaction & Data Privacy Check (DPDP Act)
     
-    **Phase 2: Legal Analyzer**  
+    *Phase 2: Legal Analyzer*  
     ✅ Semantic Conflict Detection (FAISS DB)
     
-    **Phase 3: Fairness Auditor**  
+    *Phase 3: Fairness Auditor*  
     ✅ Linguistic Bias & Inclusivity Check
     """)
 
@@ -479,7 +479,7 @@ st.sidebar.markdown("### 📊 Live Compliance Status")
 
 # Overall Status
 status_display = f"{compliance_data['status_color']} {compliance_data['overall_status']}"
-st.sidebar.markdown(f"**Overall Status:** {status_display}")
+st.sidebar.markdown(f"*Overall Status:* {status_display}")
 
 # Stats in columns
 col1, col2 = st.sidebar.columns(2)
@@ -542,7 +542,7 @@ st.markdown('<div class="section-header">Policy Document Analysis</div>', unsafe
 col1, col2 = st.columns([3, 1])
 
 with col1:
-    st.markdown("**Policy Draft to Audit**")
+    st.markdown("*Policy Draft to Audit*")
     policy_input = st.text_area(
         "Policy Draft to Audit:",
         value=placeholder_policy,
@@ -551,7 +551,7 @@ with col1:
     )
 
 with col2:
-    st.markdown("**Document Controls**")
+    st.markdown("*Document Controls*")
     uploaded_file = st.file_uploader(
         "Upload Document",
         type=['txt', 'pdf', 'docx', 'doc'],
@@ -583,7 +583,7 @@ with col2:
 
 with col3:
     if st.session_state.get("report"):
-        clear_clicked = st.button("🗑️ Clear Results", use_container_width=True, type="secondary")
+        clear_clicked = st.button("🗑 Clear Results", use_container_width=True, type="secondary")
 
 # Handle button actions immediately
 if reset_clicked:
@@ -630,7 +630,7 @@ if run_audit_clicked:
                 from vidhik_engine import analyze_policy as real_analyze_policy
                 final_report = real_analyze_policy(final_text)
             except ImportError:
-                st.warning("⚠️ Using demonstration analysis - full engine not available")
+                st.warning("⚠ Using demonstration analysis - full engine not available")
                 final_report = analyze_policy(final_text)
             
             st.session_state["report"] = final_report
@@ -656,22 +656,22 @@ if "report" in st.session_state:
     if "PASS" in status.upper():
         status_html = f'<span class="status-pass">✅ {status}</span>'
     elif "WARNING" in status.upper() or "REVIEW" in status.upper():
-        status_html = f'<span class="status-warning">⚠️ {status}</span>'
+        status_html = f'<span class="status-warning">⚠ {status}</span>'
     else:
         status_html = f'<span class="status-fail">❌ {status}</span>'
     
-    st.markdown(f"**Compliance Status:** {status_html}", unsafe_allow_html=True)
+    st.markdown(f"*Compliance Status:* {status_html}", unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
     # Executive Summary
     st.markdown('<div class="custom-card">', unsafe_allow_html=True)
-    st.markdown("**Executive Summary**")
+    st.markdown("*Executive Summary*")
     st.write(report.get("Executive Summary", "No summary available."))
     st.markdown('</div>', unsafe_allow_html=True)
 
     # Detailed Analysis
-    st.markdown("**Detailed Analysis**")
-    tab1, tab2, tab3 = st.tabs(["⚖️ Legal Compliance", "🌍 Bias Assessment", "🔐 Data Privacy"])
+    st.markdown("*Detailed Analysis*")
+    tab1, tab2, tab3 = st.tabs(["⚖ Legal Compliance", "🌍 Bias Assessment", "🔐 Data Privacy"])
 
     with tab1:
         st.markdown('<div class="custom-card">', unsafe_allow_html=True)
@@ -708,7 +708,7 @@ if "report" in st.session_state:
     
     with col1:
         st.markdown('<div class="custom-card">', unsafe_allow_html=True)
-        st.markdown("**PDF Report**")
+        st.markdown("*PDF Report*")
         pdf_bytes = create_pdf(report)
         if pdf_bytes:
             st.download_button(
@@ -722,7 +722,7 @@ if "report" in st.session_state:
 
     with col2:
         st.markdown('<div class="custom-card">', unsafe_allow_html=True)
-        st.markdown("**Raw Data**")
+        st.markdown("*Raw Data*")
         json_str = json.dumps(report, indent=2)
         st.download_button(
             label="📊 Download JSON Data",
