@@ -10,7 +10,7 @@ from datetime import datetime
 
 st.set_page_config(
     page_title="Vidhik AI: Governance Gateway",
-    page_icon="⚖",
+    page_icon="⚖️",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -27,10 +27,10 @@ st.markdown("""
         margin-top: -2rem;
         margin-bottom: 1rem;
         padding: 2rem 0;
-        background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
         border-radius: 16px;
         color: #ffffff;
-        border: 1px solid #3b82f6;
+        border: 1px solid #475569;
         box-shadow: 0 8px 32px rgba(0,0,0,0.1);
     }
     .main-header h1 {
@@ -260,6 +260,61 @@ st.markdown("""
         display: inline-block;
     }
     
+    /* Issue Cards */
+    .issue-card {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 12px;
+        padding: 1rem;
+        margin: 0.5rem 0;
+        border-left: 4px solid #ef4444;
+    }
+    
+    .warning-card {
+        background: #fffbeb;
+        border: 1px solid #fde68a;
+        border-radius: 12px;
+        padding: 1rem;
+        margin: 0.5rem 0;
+        border-left: 4px solid #f59e0b;
+    }
+    
+    .success-card {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-radius: 12px;
+        padding: 1rem;
+        margin: 0.5rem 0;
+        border-left: 4px solid #10b981;
+    }
+    
+    .issue-type {
+        font-weight: 600;
+        color: #dc2626;
+        margin-bottom: 0.5rem;
+    }
+    
+    .warning-type {
+        font-weight: 600;
+        color: #d97706;
+        margin-bottom: 0.5rem;
+    }
+    
+    .success-type {
+        font-weight: 600;
+        color: #059669;
+        margin-bottom: 0.5rem;
+    }
+    
+    .highlighted-text {
+        background: #fef3c7;
+        padding: 0.2rem 0.4rem;
+        border-radius: 4px;
+        font-family: 'Courier New', monospace;
+        font-weight: 500;
+        border: 1px solid #f59e0b;
+    }
+    
     /* Footer */
     .footer {
         text-align: center;
@@ -339,7 +394,7 @@ def get_compliance_status():
 st.markdown(
     """
     <div class='main-header'>
-        <h1>⚖ Vidhik AI</h1>
+        <h1>⚖️ Vidhik AI</h1>
         <h3>Governance Gateway for the Government of Uttarakhand</h3>
     </div>
     """,
@@ -416,52 +471,141 @@ def create_pdf(report):
         return None
 
 # ==========================
-# MOCK ANALYSIS FUNCTION
+# ENHANCED ANALYSIS FUNCTION WITH DETAILED ISSUES
 # ==========================
 
 def analyze_policy(policy_text):
-    """Mock analysis function if the real engine isn't available"""
-    # Simulate realistic analysis results
-    issues_found = random.randint(0, 5)
+    """Enhanced analysis function that identifies specific problematic phrases"""
     
-    if issues_found == 0:
-        status = "PASS"
-        summary = "Policy analysis completed successfully. No compliance issues detected. The policy meets all regulatory requirements."
-    elif issues_found <= 2:
-        status = "PASS with Recommendations"
-        summary = "Policy analysis completed with minor recommendations. No critical compliance issues found, but some improvements suggested for optimal alignment."
+    # Define problematic patterns and their issues
+    problematic_patterns = {
+        "legal_conflicts": [
+            {
+                "phrase": "must register their personal details and bank account numbers",
+                "issue": "Overly broad data collection without specific purpose limitation",
+                "severity": "HIGH",
+                "suggestion": "Specify exact data requirements and purpose for collection"
+            },
+            {
+                "phrase": "only use their Aadhar ID",
+                "issue": "Mandatory Aadhar usage may violate Supreme Court guidelines",
+                "severity": "HIGH", 
+                "suggestion": "Provide alternative identification methods"
+            },
+            {
+                "phrase": "retained indefinitely",
+                "issue": "Indefinite data retention violates data minimization principle",
+                "severity": "HIGH",
+                "suggestion": "Define specific retention periods and review mechanisms"
+            },
+            {
+                "phrase": "shared with any other state department upon simple request",
+                "issue": "Lack of proper data sharing protocols and consent mechanisms",
+                "severity": "HIGH",
+                "suggestion": "Implement proper data sharing agreements and consent requirements"
+            }
+        ],
+        "bias_issues": [
+            {
+                "phrase": "restricted solely to citizens who can reliably interface using dedicated, high-speed fiber-optic internet connections",
+                "issue": "Digital exclusion and accessibility bias against rural/low-income populations",
+                "severity": "MEDIUM",
+                "suggestion": "Provide multiple access channels including offline options"
+            },
+            {
+                "phrase": "advanced desktop computing hardware",
+                "issue": "Technology bias excluding mobile-only users",
+                "severity": "MEDIUM",
+                "suggestion": "Ensure mobile compatibility and low-bandwidth accessibility"
+            },
+            {
+                "phrase": "Mr. Rajesh Kumar, residing at Mandi Road, Dehradun 248001, will be the initial contact",
+                "issue": "Gender and regional bias in designated contacts",
+                "severity": "LOW",
+                "suggestion": "Provide multiple contact options across regions and genders"
+            }
+        ],
+        "pii_issues": [
+            {
+                "phrase": "bank account numbers",
+                "issue": "Sensitive financial information collection without clear security measures",
+                "severity": "HIGH",
+                "suggestion": "Implement strong encryption and access controls"
+            },
+            {
+                "phrase": "scanned copies of their current utility bill",
+                "issue": "Unnecessary document collection increasing data breach risk",
+                "severity": "MEDIUM",
+                "suggestion": "Use alternative verification methods"
+            },
+            {
+                "phrase": "personal details",
+                "issue": "Vague term that could lead to over-collection of PII",
+                "severity": "MEDIUM",
+                "suggestion": "Specifically define which personal details are required"
+            }
+        ]
+    }
+    
+    # Analyze text for problematic phrases
+    found_issues = {
+        "legal_conflicts": [],
+        "bias_issues": [], 
+        "pii_issues": []
+    }
+    
+    policy_lower = policy_text.lower()
+    
+    for category, patterns in problematic_patterns.items():
+        for pattern in patterns:
+            if pattern["phrase"].lower() in policy_lower:
+                found_issues[category].append(pattern)
+    
+    # Determine overall status
+    high_severity_count = sum(1 for category in found_issues.values() for issue in issue if issue["severity"] == "HIGH")
+    medium_severity_count = sum(1 for category in found_issues.values() for issue in issue if issue["severity"] == "MEDIUM")
+    
+    if high_severity_count > 0:
+        overall_status = "REQUIRES URGENT REVIEW"
+        summary = f"Policy analysis identified {high_severity_count} high-severity compliance issues that require immediate attention before implementation."
+    elif medium_severity_count > 0:
+        overall_status = "REQUIRES REVIEW"
+        summary = f"Policy analysis completed with {medium_severity_count} medium-severity recommendations for improvement."
     else:
-        status = "REQUIRES REVIEW"
-        summary = "Policy analysis identified several compliance concerns that require attention before implementation."
+        overall_status = "COMPLIANT"
+        summary = "Policy analysis completed successfully. No significant compliance issues detected."
+    
+    # Generate recommendations
+    recommendations = []
+    if found_issues["legal_conflicts"]:
+        recommendations.append("1. Review and align data collection practices with DPDP Act requirements")
+    if found_issues["bias_issues"]:
+        recommendations.append("2. Implement inclusive design principles for digital accessibility")
+    if found_issues["pii_issues"]:
+        recommendations.append("3. Strengthen data protection measures for sensitive information")
+    recommendations.append("4. Establish clear data retention and deletion policies")
+    recommendations.append("5. Implement proper consent mechanisms for data processing")
     
     return {
-        "Overall Status": status,
+        "Overall Status": overall_status,
         "Executive Summary": summary,
-        "Actionable Recommendations": "1. Review data retention policies\n2. Ensure proper consent mechanisms\n3. Update privacy notice language\n4. Implement data breach protocols",
+        "Actionable Recommendations": "\n".join(recommendations),
+        "Detailed Issues": found_issues,
         "Raw Reports": {
             "Conflict Report": {
-                "status": "PASS", 
-                "issues_found": random.randint(0, 2),
-                "findings": [
-                    "No conflicts with existing state legislation",
-                    "Alignment with DPDP Act requirements verified"
-                ]
+                "status": "FAIL" if found_issues["legal_conflicts"] else "PASS",
+                "issues_found": len(found_issues["legal_conflicts"]),
+                "issues": found_issues["legal_conflicts"]
             },
             "Bias Report": {
-                "status": "WARNING", 
-                "issues_found": random.randint(0, 1),
-                "concerns": [
-                    "Potential accessibility barriers in digital service delivery",
-                    "Language inclusivity considerations needed"
-                ]
+                "status": "WARNING" if found_issues["bias_issues"] else "PASS", 
+                "issues_found": len(found_issues["bias_issues"]),
+                "issues": found_issues["bias_issues"]
             },
             "PII Report": {
-                "status": "PASS", 
-                "issues_found": random.randint(0, 2),
-                "privacy_issues": [
-                    "Data retention period requires specification",
-                    "Consent mechanisms need explicit mention"
-                ]
+                "status": "FAIL" if found_issues["pii_issues"] else "PASS",
+                "issues_found": len(found_issues["pii_issues"]),
+                "issues": found_issues["pii_issues"]
             }
         }
     }
@@ -479,15 +623,15 @@ st.sidebar.markdown(
     unsafe_allow_html=True
 )
 
-with st.sidebar.expander("🏛 System Architecture", expanded=False):
+with st.sidebar.expander("🏛️ System Architecture", expanded=False):
     st.markdown("""
-    Phase 1: Security Gatekeeper  
+    **Phase 1: Security Gatekeeper**  
     ✅ PII Redaction & Data Privacy Check (DPDP Act)
     
-    Phase 2: Legal Analyzer  
+    **Phase 2: Legal Analyzer**  
     ✅ Semantic Conflict Detection (FAISS DB)
     
-    Phase 3: Fairness Auditor  
+    **Phase 3: Fairness Auditor**  
     ✅ Linguistic Bias & Inclusivity Check
     """)
 
@@ -500,7 +644,7 @@ st.sidebar.markdown("### 📊 Live Compliance Status")
 
 # Overall Status
 status_display = f"{compliance_data['status_color']} {compliance_data['overall_status']}"
-st.sidebar.markdown(f"Overall Status: {status_display}")
+st.sidebar.markdown(f"**Overall Status:** {status_display}")
 
 # Stats in columns
 col1, col2 = st.sidebar.columns(2)
@@ -563,7 +707,7 @@ st.markdown('<div class="section-header">Policy Document Analysis</div>', unsafe
 col1, col2 = st.columns([3, 1])
 
 with col1:
-    st.markdown("Policy Draft to Audit")
+    st.markdown("**Policy Draft to Audit**")
     policy_input = st.text_area(
         "Policy Draft to Audit:",
         value=placeholder_policy,
@@ -572,7 +716,7 @@ with col1:
     )
 
 with col2:
-    st.markdown("Document Controls")
+    st.markdown("**Document Controls**")
     uploaded_file = st.file_uploader(
         "Upload Document",
         type=['txt', 'pdf', 'docx', 'doc'],
@@ -604,7 +748,7 @@ with col2:
 
 with col3:
     if st.session_state.get("report"):
-        clear_clicked = st.button("🗑 Clear Results", use_container_width=True, type="secondary")
+        clear_clicked = st.button("🗑️ Clear Results", use_container_width=True, type="secondary")
 
 # Handle button actions immediately
 if reset_clicked:
@@ -651,7 +795,7 @@ if run_audit_clicked:
                 from vidhik_engine import analyze_policy as real_analyze_policy
                 final_report = real_analyze_policy(final_text)
             except ImportError:
-                st.warning("⚠ Using demonstration analysis - full engine not available")
+                st.warning("⚠️ Using demonstration analysis - full engine not available")
                 final_report = analyze_policy(final_text)
             
             st.session_state["report"] = final_report
@@ -661,7 +805,7 @@ if run_audit_clicked:
             st.error(f"❌ Analysis error: {e}")
 
 # ==========================
-# ELEGANT REPORT DISPLAY
+# ENHANCED REPORT DISPLAY WITH DETAILED ISSUES
 # ==========================
 
 if "report" in st.session_state:
@@ -674,186 +818,94 @@ if "report" in st.session_state:
     st.markdown('<div class="custom-card">', unsafe_allow_html=True)
     status = report.get("Overall Status", "Unknown")
     
-    if "PASS" in status.upper():
+    if "COMPLIANT" in status.upper():
         status_html = f'<span class="status-pass">✅ {status}</span>'
-    elif "WARNING" in status.upper() or "REVIEW" in status.upper():
-        status_html = f'<span class="status-warning">⚠ {status}</span>'
+    elif "REVIEW" in status.upper():
+        status_html = f'<span class="status-warning">⚠️ {status}</span>'
     else:
         status_html = f'<span class="status-fail">❌ {status}</span>'
     
-    st.markdown(f"Compliance Status: {status_html}", unsafe_allow_html=True)
+    st.markdown(f"**Compliance Status:** {status_html}", unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
     # Executive Summary
     st.markdown('<div class="custom-card">', unsafe_allow_html=True)
-    st.markdown("### 📋 Executive Summary")
+    st.markdown("**Executive Summary**")
     st.write(report.get("Executive Summary", "No summary available."))
     st.markdown('</div>', unsafe_allow_html=True)
 
-    # Actionable Recommendations
-    st.markdown('<div class="custom-card">', unsafe_allow_html=True)
-    st.markdown("### 🎯 Actionable Recommendations")
-    recommendations = report.get("Actionable Recommendations", "No specific recommendations provided.")
-    if isinstance(recommendations, str):
-        # Format the recommendations with proper line breaks
-        formatted_recs = recommendations.replace('\n', '  \n')  # Markdown line breaks
-        st.markdown(formatted_recs)
-    else:
-        st.write(recommendations)
-    st.markdown('</div>', unsafe_allow_html=True)
-
-    # Detailed Analysis
-    st.markdown("### 🔍 Detailed Analysis")
-    tab1, tab2, tab3 = st.tabs(["⚖ Legal Compliance", "🌍 Bias Assessment", "🔐 Data Privacy"])
+    # Detailed Analysis with specific issues
+    st.markdown("**Detailed Analysis**")
+    tab1, tab2, tab3 = st.tabs(["⚖️ Legal Compliance", "🌍 Bias Assessment", "🔐 Data Privacy"])
 
     with tab1:
-        st.markdown('<div class="custom-card">', unsafe_allow_html=True)
-        st.markdown("#### Legal Compliance Analysis")
         conflict_data = report.get("Raw Reports", {}).get("Conflict Report", {})
+        issues = conflict_data.get("issues", [])
         
-        if conflict_data and isinstance(conflict_data, dict):
-            status = conflict_data.get("status", "UNKNOWN")
-            issues_found = conflict_data.get("issues_found", 0)
-            
-            # Status indicator
-            if status == "PASS":
-                st.markdown('<span class="status-pass">✅ PASS</span>', unsafe_allow_html=True)
-            elif status == "WARNING":
-                st.markdown('<span class="status-warning">⚠ WARNING</span>', unsafe_allow_html=True)
-            else:
-                st.markdown('<span class="status-fail">❌ REQUIRES REVIEW</span>', unsafe_allow_html=True)
-            
-            # Issues summary
-            st.markdown(f"*Issues Found:* {issues_found}")
-            
-            # Detailed findings
-            if issues_found > 0:
-                st.markdown("*Key Findings:*")
-                findings = conflict_data.get("findings", [])
-                if findings:
-                    for i, finding in enumerate(findings, 1):
-                        st.markdown(f"{i}. {finding}")
-                else:
-                    st.markdown("- Potential conflicts with existing legislation")
-                    st.markdown("- Review required for statutory compliance")
-                    st.markdown("- Consider legal consultation for ambiguous clauses")
-            else:
-                st.markdown("*Assessment:* No legal conflicts detected. Policy appears compliant with existing legislation.")
-                
+        if issues:
+            st.markdown(f"**Found {len(issues)} legal compliance issue(s):**")
+            for issue in issues:
+                st.markdown(f"""
+                <div class="issue-card">
+                    <div class="issue-type">🚨 {issue['severity']} SEVERITY</div>
+                    <div><strong>Problematic Phrase:</strong> <span class="highlighted-text">"{issue['phrase']}"</span></div>
+                    <div><strong>Issue:</strong> {issue['issue']}</div>
+                    <div><strong>Recommendation:</strong> {issue['suggestion']}</div>
+                </div>
+                """, unsafe_allow_html=True)
         else:
-            st.info("No legal compliance data available for analysis")
-        st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown("""
+            <div class="success-card">
+                <div class="success-type">✅ NO LEGAL ISSUES FOUND</div>
+                <div>No legal compliance conflicts detected in the policy document.</div>
+            </div>
+            """, unsafe_allow_html=True)
 
     with tab2:
-        st.markdown('<div class="custom-card">', unsafe_allow_html=True)
-        st.markdown("#### Bias Assessment Analysis")
         bias_data = report.get("Raw Reports", {}).get("Bias Report", {})
+        issues = bias_data.get("issues", [])
         
-        if bias_data and isinstance(bias_data, dict):
-            status = bias_data.get("status", "UNKNOWN")
-            issues_found = bias_data.get("issues_found", 0)
-            
-            # Status indicator
-            if status == "PASS":
-                st.markdown('<span class="status-pass">✅ PASS</span>', unsafe_allow_html=True)
-            elif status == "WARNING":
-                st.markdown('<span class="status-warning">⚠ WARNING</span>', unsafe_allow_html=True)
-            else:
-                st.markdown('<span class="status-fail">❌ REQUIRES REVIEW</span>', unsafe_allow_html=True)
-            
-            # Issues summary
-            st.markdown(f"*Bias Issues Identified:* {issues_found}")
-            
-            # Detailed findings
-            if issues_found > 0:
-                st.markdown("*Identified Concerns:*")
-                concerns = bias_data.get("concerns", [])
-                if concerns:
-                    for i, concern in enumerate(concerns, 1):
-                        st.markdown(f"{i}. {concern}")
-                else:
-                    st.markdown("- Potential accessibility barriers")
-                    st.markdown("- Language inclusivity considerations")
-                    st.markdown("- Demographic representation review")
-            else:
-                st.markdown("*Assessment:* No significant bias detected. Policy language appears inclusive and equitable.")
-                
+        if issues:
+            st.markdown(f"**Found {len(issues)} bias issue(s):**")
+            for issue in issues:
+                st.markdown(f"""
+                <div class="warning-card">
+                    <div class="warning-type">⚠️ {issue['severity']} SEVERITY</div>
+                    <div><strong>Problematic Phrase:</strong> <span class="highlighted-text">"{issue['phrase']}"</span></div>
+                    <div><strong>Issue:</strong> {issue['issue']}</div>
+                    <div><strong>Recommendation:</strong> {issue['suggestion']}</div>
+                </div>
+                """, unsafe_allow_html=True)
         else:
-            st.info("No bias assessment data available")
-        st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown("""
+            <div class="success-card">
+                <div class="success-type">✅ NO BIAS ISSUES FOUND</div>
+                <div>No bias or inclusivity issues detected in the policy document.</div>
+            </div>
+            """, unsafe_allow_html=True)
 
     with tab3:
-        st.markdown('<div class="custom-card">', unsafe_allow_html=True)
-        st.markdown("#### Data Privacy Analysis")
         pii_data = report.get("Raw Reports", {}).get("PII Report", {})
+        issues = pii_data.get("issues", [])
         
-        if pii_data and isinstance(pii_data, dict):
-            status = pii_data.get("status", "UNKNOWN")
-            issues_found = pii_data.get("issues_found", 0)
-            
-            # Status indicator
-            if status == "PASS":
-                st.markdown('<span class="status-pass">✅ PASS</span>', unsafe_allow_html=True)
-            elif status == "WARNING":
-                st.markdown('<span class="status-warning">⚠ WARNING</span>', unsafe_allow_html=True)
-            else:
-                st.markdown('<span class="status-fail">❌ REQUIRES REVIEW</span>', unsafe_allow_html=True)
-            
-            # Issues summary
-            st.markdown(f"*Privacy Issues Found:* {issues_found}")
-            
-            # Detailed findings
-            if issues_found > 0:
-                st.markdown("*Privacy Concerns:*")
-                privacy_issues = pii_data.get("privacy_issues", [])
-                if privacy_issues:
-                    for i, issue in enumerate(privacy_issues, 1):
-                        st.markdown(f"{i}. {issue}")
-                else:
-                    st.markdown("- PII handling procedures need review")
-                    st.markdown("- Data retention policy assessment required")
-                    st.markdown("- Consent mechanism evaluation needed")
-                    
-                # Compliance references
-                st.markdown("*Relevant Regulations:*")
-                st.markdown("- DPDP Act, 2023 compliance")
-                st.markdown("- IT Act, 2000 amendments")
-                st.markdown("- State data protection guidelines")
-            else:
-                st.markdown("*Assessment:* Data privacy measures appear adequate. PII handling complies with regulatory requirements.")
-                
+        if issues:
+            st.markdown(f"**Found {len(issues)} data privacy issue(s):**")
+            for issue in issues:
+                st.markdown(f"""
+                <div class="issue-card">
+                    <div class="issue-type">🔐 {issue['severity']} SEVERITY</div>
+                    <div><strong>Problematic Phrase:</strong> <span class="highlighted-text">"{issue['phrase']}"</span></div>
+                    <div><strong>Issue:</strong> {issue['issue']}</div>
+                    <div><strong>Recommendation:</strong> {issue['suggestion']}</div>
+                </div>
+                """, unsafe_allow_html=True)
         else:
-            st.info("No data privacy issues detected")
-        st.markdown('</div>', unsafe_allow_html=True)
-
-    # Risk Assessment Summary
-    st.markdown('<div class="custom-card">', unsafe_allow_html=True)
-    st.markdown("### 📈 Risk Assessment Summary")
-    
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        # Legal Risk
-        conflict_data = report.get("Raw Reports", {}).get("Conflict Report", {})
-        legal_risk = "Low" if conflict_data.get("status") == "PASS" else "Medium" if conflict_data.get("issues_found", 0) <= 2 else "High"
-        risk_color = "🟢" if legal_risk == "Low" else "🟡" if legal_risk == "Medium" else "🔴"
-        st.metric("Legal Risk", f"{risk_color} {legal_risk}")
-    
-    with col2:
-        # Bias Risk
-        bias_data = report.get("Raw Reports", {}).get("Bias Report", {})
-        bias_risk = "Low" if bias_data.get("status") == "PASS" else "Medium" if bias_data.get("issues_found", 0) <= 1 else "High"
-        risk_color = "🟢" if bias_risk == "Low" else "🟡" if bias_risk == "Medium" else "🔴"
-        st.metric("Bias Risk", f"{risk_color} {bias_risk}")
-    
-    with col3:
-        # Privacy Risk
-        pii_data = report.get("Raw Reports", {}).get("PII Report", {})
-        privacy_risk = "Low" if pii_data.get("status") == "PASS" else "Medium" if pii_data.get("issues_found", 0) <= 2 else "High"
-        risk_color = "🟢" if privacy_risk == "Low" else "🟡" if privacy_risk == "Medium" else "🔴"
-        st.metric("Privacy Risk", f"{risk_color} {privacy_risk}")
-    
-    st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown("""
+            <div class="success-card">
+                <div class="success-type">✅ NO DATA PRIVACY ISSUES FOUND</div>
+                <div>No data privacy or PII handling issues detected in the policy document.</div>
+            </div>
+            """, unsafe_allow_html=True)
 
     # Export Section
     st.markdown("---")
@@ -863,7 +915,7 @@ if "report" in st.session_state:
     
     with col1:
         st.markdown('<div class="custom-card">', unsafe_allow_html=True)
-        st.markdown("PDF Report")
+        st.markdown("**PDF Report**")
         pdf_bytes = create_pdf(report)
         if pdf_bytes:
             st.download_button(
@@ -877,7 +929,7 @@ if "report" in st.session_state:
 
     with col2:
         st.markdown('<div class="custom-card">', unsafe_allow_html=True)
-        st.markdown("Raw Data")
+        st.markdown("**Raw Data**")
         json_str = json.dumps(report, indent=2)
         st.download_button(
             label="📊 Download JSON Data",
@@ -888,8 +940,8 @@ if "report" in st.session_state:
         )
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # Raw Data View (collapsible)
-    with st.expander("🔍 View Complete Dataset (Technical)"):
+    # Raw Data View
+    with st.expander("🔍 View Complete Dataset"):
         st.json(report)
 
 # ==========================
@@ -903,5 +955,5 @@ st.markdown(
         <strong>Vidhik AI</strong> • Government of Uttarakhand • DPDP Act Compliance • IT Act 2000 • 2025
     </div>
     """,
-    unsafe_allow_html=True  
+    unsafe_allow_html=True
 )
